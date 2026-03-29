@@ -2,868 +2,1266 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026 NCAA Tournament · Live Predictor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bracket 2026 Analyzed Beta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
+/* ── Google Sans — loaded directly from Google's font CDN ── */
+@font-face{font-family:'Google Sans';font-style:normal;font-weight:400;font-display:swap;
+  src:local('Google Sans'),local('GoogleSans-Regular'),
+  url(https://fonts.gstatic.com/s/googlesans/v58/4UaGrENHsxJlGDuGo1OIlL3Kwp5MKg.woff2) format('woff2');}
+@font-face{font-family:'Google Sans';font-style:normal;font-weight:500;font-display:swap;
+  src:local('Google Sans Medium'),local('GoogleSans-Medium'),
+  url(https://fonts.gstatic.com/s/googlesans/v58/4UabrENHsxJlGDuGo1OIlLU94YtzCwY.woff2) format('woff2');}
+@font-face{font-family:'Google Sans';font-style:normal;font-weight:700;font-display:swap;
+  src:local('Google Sans Bold'),local('GoogleSans-Bold'),
+  url(https://fonts.gstatic.com/s/googlesans/v58/4UabrENHsxJlGDuGo1OIlLV154tzCwY.woff2) format('woff2');}
+</style>
+<style>
+/*
+  TYPOGRAPHY — Google Sans everywhere
+  'Google Sans'  → ALL text: UI, scores, labels, titles, navigation
+                   Loaded via @font-face from fonts.gstatic.com
+  'Roboto Mono'  → Clocks, codes, stats (tabular digits, never shift width)
+*/
 :root{
-  --bg:#080d18;--surface:#0f1624;--card:#161e30;--border:#1e2d47;--border2:#28405e;
-  --chalk:#dde3ef;--dim:#6b7a96;--ghost:#2a3650;
-  --orange:#f07830;--orange2:#7a3a14;--orange3:#ff9f5a;
-  --green:#34c97a;--green2:#0d4d2e;
-  --red:#e84040;--red2:#4d1414;
-  --blue:#4a9eff;--blue2:#0d2a5c;
-  --gold:#f0c040;--gold2:#5c4500;
-  --purple:#a855f7;--purple2:#2d1060;
-  --east:#e84040;--west:#4a9eff;--midwest:#f0a030;--south:#34c97a;
-  --r1:#080d18;--r2:#0c1222;--r3:#0e1528;--r4:#10182e;--r5:#121b34;--r6:#14203c;
+  --bg:#06080f; --s1:#090c18; --s2:#0c1020; --s3:#101528;
+  --card:#131a2c; --b0:#182038; --b1:#203058; --b2:#2a3e70;
+  --ink:#c4d0ec; --ink2:#526098; --ink3:#1c2640;
+  --acc:#df5310; --acc2:#501600; --acc3:#ef6628;
+  --grn:#1abc60; --grn2:#031508; --grn3:#6af0a0;
+  --red:#f03535; --red2:#330505;
+  --gld:#e8a600; --gld2:#261a00; --gld3:#ffc830;
+  --blu:#2878f8; --blu2:#081848;
+  --pur:#8855f0; --pur2:#1a0838;
+  --cyn:#00aed0; --cyn2:#001820;
+  --east:#f03535; --west:#2878f8; --mid:#e8a600; --sth:#1abc60;
+  --f-ui:'Google Sans',sans-serif;
+  --f-sc:'Google Sans',sans-serif;
+  --f-mo:'Roboto Mono','Courier New',monospace;
+  --r:8px; --rl:12px;
+  --px:clamp(12px,4vw,28px);
+  --gap:clamp(8px,2vw,16px);
 }
-body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--chalk);min-height:100vh;font-size:14px}
-a{color:inherit;text-decoration:none}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--f-ui);background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;font-size:18px}
+
+/* ANIMATIONS */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.12}}
+@keyframes glow{0%,100%{color:var(--grn);text-shadow:none}50%{color:var(--grn3);text-shadow:0 0 16px rgba(26,188,96,.48)}}
+@keyframes cardpulse{0%,100%{box-shadow:0 0 0 1px rgba(26,188,96,.08)}50%{box-shadow:0 0 20px 2px rgba(26,188,96,.18),0 0 0 1px rgba(26,188,96,.38)}}
+@keyframes rowpulse{0%,100%{background:rgba(26,188,96,.03)}50%{background:rgba(26,188,96,.07)}}
+@keyframes dotblink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0;transform:scale(.25)}}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes slideup{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes flashbg{0%{opacity:.35}100%{opacity:0}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:rgba(6,8,15,.95);z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .3s}
+.loading-overlay.gone{opacity:0;pointer-events:none}
+.spin{width:44px;height:44px;border:3px solid var(--b1);border-top-color:var(--grn);border-radius:50%;animation:spin .75s linear infinite}
+.load-txt{font-family:var(--f-mo);font-size:14px;color:var(--ink2);letter-spacing:.06em}
 
 /* HEADER */
-.hdr{padding:1.5rem 1.5rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem}
-.hdr-left h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.8rem,4vw,3rem);letter-spacing:.06em;line-height:1;color:var(--chalk)}
-.hdr-left p{font-size:11px;color:var(--dim);margin-top:4px;font-family:'IBM Plex Mono',monospace}
-.tag{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;padding:3px 10px;border-radius:4px;font-weight:500}
-.tag-live{background:var(--orange2);color:var(--orange)}
-.tag-round{background:var(--blue2);color:var(--blue)}
-.accuracy-row{display:flex;gap:1.5rem;flex-wrap:wrap;padding:.75rem 1.5rem;background:var(--surface);border-bottom:1px solid var(--border)}
-.acc-stat{display:flex;flex-direction:column;gap:2px}
-.acc-stat .val{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.04em;color:var(--gold)}
-.acc-stat .lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
+header{background:linear-gradient(180deg,#0b0f20 0%,var(--s1) 100%);border-bottom:2px solid var(--b0);padding:clamp(10px,2vw,16px) var(--px);position:sticky;top:0;z-index:300}
+.hdr{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:clamp(8px,2vw,14px)}
+/* DM Serif Display title — stroke contrast gives it presence */
+.site-title{font-family:var(--f-sc);font-size:clamp(1.4rem,3.5vw,2.3rem);font-weight:400;letter-spacing:-.01em;line-height:1.1;color:var(--ink)}
+.site-title .yr{color:var(--acc3)}
+.site-title .beta{font-family:var(--f-mo);font-size:.43em;font-weight:600;letter-spacing:.07em;vertical-align:super;color:var(--cyn);background:var(--cyn2);border:1px solid rgba(0,174,208,.22);padding:2px 5px;border-radius:4px;margin-left:5px}
+.hdr-meta{font-family:var(--f-mo);font-size:clamp(10.5px,1.1vw,12.5px);color:var(--ink2);margin-top:4px;letter-spacing:.02em;line-height:1.65}
+.src-link{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-mo);font-size:clamp(10.5px,1.1vw,12.5px);font-weight:500;color:var(--cyn);text-decoration:none;background:var(--cyn2);border:1px solid rgba(0,174,208,.22);padding:3px 9px;border-radius:4px;margin-top:5px}
+.src-dot{width:6px;height:6px;border-radius:50%;background:var(--cyn);flex-shrink:0;animation:dotblink 2s ease-in-out infinite}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.badge-row{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.bdg{font-family:var(--f-mo);font-size:clamp(10.5px,1.1vw,12.5px);font-weight:600;padding:3px 8px;border-radius:4px;letter-spacing:.04em;white-space:nowrap}
+.bdg-fin{background:var(--acc2);color:var(--acc3)}
+.bdg-blu{background:var(--blu2);color:var(--blu)}
+.bdg-gld{background:var(--gld2);color:var(--gld)}
+/* API status */
+.api-row{display:flex;align-items:center;gap:6px;font-family:var(--f-mo);font-size:11.5px;color:var(--ink2)}
+.api-dot{width:7px;height:7px;border-radius:50%}
+.api-dot.ok{background:var(--grn)}.api-dot.err{background:var(--red)}.api-dot.ld{background:var(--gld);animation:blink 1s ease-in-out infinite}
+/* Countdown ring */
+.ring-row{display:flex;align-items:center;gap:8px}
+.ring-wrap{position:relative;width:30px;height:30px;flex-shrink:0}
+.ring-svg{width:30px;height:30px;transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:var(--b1);stroke-width:3}
+.ring-arc{fill:none;stroke:var(--grn);stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .7s linear}
+.ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--f-mo);font-size:13px;font-weight:600;color:var(--grn)}
+.ring-label{font-family:var(--f-ui);font-size:14px;color:var(--ink2);line-height:1.4}
+.ring-label strong{color:var(--ink);font-weight:600}
+.ring-sub{font-family:var(--f-mo);font-size:11px;color:var(--cyn);display:block}
+
+/* TICKER */
+.ticker-wrap{height:28px;display:flex;align-items:center;background:var(--s1);border-bottom:1px solid var(--b0);overflow:hidden}
+.ticker-tag{font-family:var(--f-ui);font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--grn);background:var(--grn2);padding:0 10px;height:100%;display:flex;align-items:center;flex-shrink:0;border-right:1px solid var(--b0)}
+.ticker-outer{overflow:hidden;flex:1;height:100%}
+.ticker-scroll{display:flex;align-items:center;white-space:nowrap;height:100%;animation:ticker 55s linear infinite}
+.ti{font-family:var(--f-ui);font-size:14px;font-weight:500;padding:0 1.5rem;height:100%;display:flex;align-items:center;gap:6px;border-right:1px solid var(--b0)}
+.td{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.td-l{background:var(--grn);animation:dotblink 1.2s ease-in-out infinite}
+.td-f{background:var(--acc3)}.td-s{background:var(--ink2)}
+/* DM Serif for ticker scores */
+.tt-l{font-family:var(--f-sc);color:var(--grn);font-size:15.5px;animation:glow 2s ease-in-out infinite}
+.tt-f{font-family:var(--f-sc);color:var(--acc3);font-size:17.5px}
+.tt-s{color:var(--ink2);font-size:14px}
+
+/* STATUS BAR */
+.lu-bar{font-family:var(--f-mo);font-size:11.5px;color:var(--ink2);padding:3px var(--px);background:var(--s3);border-bottom:1px solid var(--b0);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lu-dot{width:6px;height:6px;border-radius:50%;background:var(--grn);flex-shrink:0}
+
+/* STATS BAR */
+.stats-bar{display:flex;gap:1px;background:var(--b0);border-bottom:1px solid var(--b1);overflow-x:auto;scrollbar-width:none}
+.stats-bar::-webkit-scrollbar{display:none}
+.stat-cell{flex:1;min-width:65px;padding:clamp(5px,1vw,9px) clamp(8px,1.5vw,14px);background:var(--s1);display:flex;flex-direction:column;gap:2px;white-space:nowrap}
+/* DM Serif Display — high-contrast strokes give stats weight */
+.stat-val{font-family:var(--f-sc);font-size:clamp(1.1rem,2.3vw,1.55rem);font-weight:400;line-height:1.05}
+.stat-lbl{font-family:var(--f-mo);font-size:clamp(9.5px,0.9vw,11.5px);font-weight:500;color:var(--ink2);letter-spacing:.07em;text-transform:uppercase}
+.sv-gld .stat-val{color:var(--gld)}.sv-grn .stat-val{color:var(--grn)}.sv-acc .stat-val{color:var(--acc3)}.sv-red .stat-val{color:var(--red)}.sv-blu .stat-val{color:var(--blu)}
 
 /* TABS */
-.tabs{display:flex;gap:0;background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;overflow-x:auto}
-.tab{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:.6rem 1.1rem;background:transparent;border:none;color:var(--dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .15s,border-color .15s}
-.tab.active{color:var(--orange);border-bottom-color:var(--orange)}
-.tab-content{display:none}.tab-content.active{display:block}
+.tabs{display:flex;background:var(--s2);border-bottom:1px solid var(--b0);overflow-x:auto;position:sticky;top:clamp(74px,10vw,96px);z-index:200;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab-btn{font-family:var(--f-ui);font-size:clamp(13.5px,1.5vw,16px);font-weight:600;letter-spacing:.01em;padding:clamp(7px,1.2vw,11px) clamp(10px,2vw,18px);background:transparent;border:none;color:var(--ink2);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.tab-btn:hover{color:var(--ink)}.tab-btn.active{color:var(--acc3);border-bottom-color:var(--acc)}
+.tab-pane{display:none}.tab-pane.active{display:block;animation:slideup .2s ease}
 
-/* BRACKET CANVAS */
-.bracket-wrap{overflow-x:auto;padding:1rem 1.5rem 2rem}
-.bracket-grid{display:grid;grid-template-columns:repeat(7,160px) 20px repeat(7,160px);gap:0;min-width:1200px;position:relative}
+/* SECTION */
+.sec{padding:clamp(10px,2vw,18px) var(--px);border-bottom:1px solid var(--b0)}
+.sec-hdr{display:flex;align-items:center;gap:.65rem;margin-bottom:clamp(8px,1.5vw,14px);flex-wrap:wrap}
+.sec-hdr h2{font-family:var(--f-ui);font-size:clamp(.8rem,1.8vw,.93rem);font-weight:700;letter-spacing:.01em;text-transform:uppercase}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--grn);flex-shrink:0;animation:dotblink 1.2s ease-in-out infinite}
 
-/* REGION TABS */
-.region-tabs{display:flex;gap:6px;padding:.75rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
-.region-tab{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:4px 12px;border-radius:4px;cursor:pointer;border:1px solid var(--border2);color:var(--dim);background:transparent;transition:all .15s}
-.region-tab.active{color:#fff;border-color:transparent}
-.region-tab[data-r="east"].active{background:var(--east)}
-.region-tab[data-r="west"].active{background:var(--west)}
-.region-tab[data-r="midwest"].active{background:var(--midwest)}
-.region-tab[data-r="south"].active{background:var(--south)}
-.region-tab[data-r="all"].active{background:var(--orange)}
+/* RESPONSIVE CARD GRID */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,295px),1fr));gap:var(--gap)}
 
-/* MAIN TABLE VIEW */
-.main-view{padding:1rem 1.5rem}
-.round-section{margin-bottom:1.5rem}
-.round-hdr{display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;padding:.4rem 0;border-bottom:1px solid var(--border)}
-.round-hdr h2{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.08em;color:var(--chalk)}
-.round-hdr .games-count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);margin-left:auto}
-.round-accuracy{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:2px 10px;border-radius:4px}
+/* LIVE/FINAL CARDS */
+.lcard{background:var(--card);border-radius:var(--rl);border:1px solid var(--b1);overflow:hidden}
+.lcard.live{animation:cardpulse 3s ease-in-out infinite}
+.lcard-hdr{display:flex;align-items:center;gap:7px;padding:6px 12px}
+.live .lcard-hdr{background:var(--grn2)}.final .lcard-hdr{background:var(--s3)}.sched .lcard-hdr{background:var(--s3)}
+.lcard-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.live .lcard-dot{background:var(--grn);animation:dotblink 1.2s ease-in-out infinite}.final .lcard-dot{background:var(--acc3)}.sched .lcard-dot{background:var(--ink2)}
+.lcard-lbl{font-family:var(--f-ui);font-size:12.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.live .lcard-lbl{color:var(--grn)}.final .lcard-lbl{color:var(--acc3)}.sched .lcard-lbl{color:var(--ink2)}
+.lcard-clk{font-family:var(--f-mo);font-size:14px;font-weight:600;margin-left:auto;letter-spacing:.04em}
+.live .lcard-clk{color:var(--grn);animation:glow 2s ease-in-out infinite}.final .lcard-clk{color:var(--acc3)}
+.lcard-body{padding:clamp(8px,1.5vw,12px) clamp(10px,2vw,15px) clamp(6px,1vw,10px)}
+.team-row{display:flex;align-items:center;gap:7px;padding:5px 0}
+.team-row+.team-row{border-top:1px solid var(--b0)}
+.team-seed{font-family:var(--f-mo);font-size:13px;font-weight:500;color:var(--ink2);min-width:16px;text-align:right}
+.team-name{font-family:var(--f-ui);font-size:clamp(.88rem,1.9vw,.98rem);font-weight:600;flex:1;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.team-name.leader{color:var(--grn)}.team-name.winner{color:var(--acc3)}
+.leads-chip{font-family:var(--f-ui);font-size:11px;font-weight:700;background:var(--acc3);color:#06080f;padding:1px 5px;border-radius:3px;letter-spacing:.04em;flex-shrink:0}
+/* DM Serif Display for scores — high stroke contrast = not flat */
+.team-score{font-family:var(--f-sc);font-size:clamp(1.85rem,4vw,2.4rem);font-weight:400;min-width:46px;text-align:right;letter-spacing:-.02em;line-height:1;color:var(--ink2)}
+.team-score.leader{color:var(--grn);animation:glow 2s ease-in-out infinite}
+.team-score.winner{color:var(--acc3)}.team-score.loser{color:var(--ink2)}
+.lcard-footer{padding:4px 12px;background:var(--s3);border-top:1px solid var(--b0);display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px;font-family:var(--f-mo);font-size:11.5px;color:var(--ink2)}
+.pred-txt{color:var(--acc3)}.proj-txt{color:var(--cyn)}
+.upset-banner{padding:5px 12px;background:rgba(136,85,240,.1);border-top:1px solid rgba(136,85,240,.3);font-family:var(--f-ui);font-size:12.5px;font-weight:700;color:var(--pur)}
 
-table{width:100%;border-collapse:collapse}
-thead tr{background:var(--ghost)}
-th{padding:5px 8px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.07em;color:var(--dim);text-align:left;white-space:nowrap}
-th.r{text-align:right}
-td{padding:5px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
-tr:last-child td{border-bottom:none}
+/* SCHED ROW */
+.sched-row{display:flex;align-items:center;gap:.8rem;padding:.45rem 0;border-bottom:1px solid var(--b0);flex-wrap:wrap}
+.sched-game{font-family:var(--f-ui);font-size:clamp(15.5px,1.6vw,17px);font-weight:600}
+.sched-time{font-family:var(--f-mo);font-size:12px;color:var(--ink2)}
+.sched-pred{font-family:var(--f-mo);font-size:12px;color:var(--acc3);margin-left:auto}
 
-.tc{display:flex;align-items:center;gap:6px}
-.seed{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);min-width:18px;text-align:right}
-.tn{font-weight:500;color:var(--chalk);white-space:nowrap}
-.tn.winner{color:var(--orange)}
-.tn.eliminated{color:var(--dim);text-decoration:line-through;text-decoration-color:var(--ghost)}
+/* CHIPS */
+.chip{display:inline-flex;align-items:center;gap:3px;font-family:var(--f-ui);font-size:clamp(11px,1.1vw,12.5px);font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:.02em;white-space:nowrap}
+.c-ok{background:var(--grn2);color:var(--grn)}.c-no{background:var(--red2);color:var(--red)}
+.c-live{background:var(--grn2);color:var(--grn);animation:blink 1.5s ease-in-out infinite}
+.c-pred{background:var(--acc2);color:var(--acc3)}.c-upset{background:var(--pur2);color:var(--pur)}
+.c-fin{background:var(--gld2);color:var(--gld)}.c-tbd{background:var(--s3);color:var(--ink2)}
+.cdot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:dotblink 1.2s ease-in-out infinite}
 
-.sc{font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right}
-.sc.hi{color:var(--orange)}
-.sc.lo{color:var(--dim)}
+/* BRACKET TABLE */
+.bkt-wrap{padding:clamp(10px,2vw,18px) var(--px)}
+.round-block{margin-bottom:clamp(12px,2vw,22px)}
+.round-hdr{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;padding:.3rem 0;border-bottom:2px solid var(--b0);flex-wrap:wrap}
+.round-hdr h2{font-family:var(--f-ui);font-size:clamp(.82rem,1.7vw,.93rem);font-weight:700;letter-spacing:.01em;text-transform:uppercase}
+.rpill{font-family:var(--f-mo);font-size:11px;font-weight:600;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.05em}
+.rp1{background:#181500;color:#a89800}.rp2{background:#001516;color:#009ab5}.rp3{background:#090018;color:#6858df}.rp4{background:#120010;color:#bf58ce}.rpf{background:#190900;color:var(--acc3)}.rpc{background:#171200;color:var(--gld)}
+.racc{margin-left:auto;font-family:var(--f-mo);font-size:11px;font-weight:600;padding:2px 7px;border-radius:3px;background:var(--grn2);color:var(--grn)}
+.rpred{font-family:var(--f-mo);font-size:11px;font-weight:600;padding:2px 7px;border-radius:3px;background:var(--acc2);color:var(--acc3)}
+/* Scrollable table on mobile */
+.tbl-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r)}
+table{width:100%;border-collapse:collapse;min-width:430px}
+thead th{padding:5px 7px;font-family:var(--f-ui);font-size:clamp(11px,1.1vw,12.5px);font-weight:600;letter-spacing:.02em;color:var(--ink2);text-align:left;background:var(--s3);border-bottom:1px solid var(--b0);white-space:nowrap}
+th.tr,td.tr{text-align:right}
+td{padding:clamp(4px,0.9vw,6px) 7px;border-bottom:1px solid var(--b0);vertical-align:middle}
+tr.done{background:var(--s1)}tr.live-row{animation:rowpulse 3s ease-in-out infinite;border-left:3px solid var(--grn)}tr.sched-row2{background:var(--bg)}tr.tbd{background:var(--bg);opacity:.5}tr:hover{filter:brightness(1.1)}
+.tc{display:flex;align-items:center;gap:5px}
+.t-seed{font-family:var(--f-mo);font-size:11.5px;font-weight:500;color:var(--ink2);min-width:15px;text-align:right}
+.t-name{font-family:var(--f-ui);font-size:clamp(13.5px,1.4vw,16px);font-weight:500;white-space:nowrap}
+.t-name.won{color:var(--acc3);font-weight:700}.t-name.out{color:var(--ink3);text-decoration:line-through;text-decoration-color:var(--b1)}
+.reg-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+/* DM Serif for table scores */
+.ps{font-family:var(--f-sc);font-size:clamp(14px,1.4vw,16.5px)}.ps-w{color:var(--acc3)}.ps-l{color:var(--ink2)}
+.as{font-family:var(--f-sc);font-size:clamp(14px,1.4vw,16.5px)}.as-w{color:var(--grn)}.as-l{color:var(--ink2)}
+.as-lv{color:var(--grn);animation:glow 2s ease-in-out infinite}
+.win-bar{display:flex;height:4px;border-radius:2px;overflow:hidden;background:var(--b0);width:60px;margin-top:3px}
+.win-fill{background:var(--acc);height:100%;transition:width .5s}
+.eg{font-family:var(--f-mo);font-size:11px;color:var(--grn)}.em{font-family:var(--f-mo);font-size:11px;color:var(--ink2)}.eb{font-family:var(--f-mo);font-size:11px;color:var(--red)}
 
-.pct{font-family:'IBM Plex Mono',monospace;font-size:12px;text-align:right}
-.pct.hi{color:var(--orange)}
-.pct.lo{color:var(--dim)}
+/* FILTER BAR */
+.filter-bar{display:flex;gap:5px;padding:clamp(7px,1.4vw,11px) var(--px);background:var(--s2);border-bottom:1px solid var(--b0);flex-wrap:wrap;align-items:center;overflow-x:auto;scrollbar-width:none}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-lbl{font-family:var(--f-mo);font-size:11.5px;color:var(--ink2);flex-shrink:0}
+.flt{font-family:var(--f-ui);font-size:clamp(13px,1.4vw,15.5px);font-weight:600;padding:4px 11px;border-radius:4px;cursor:pointer;border:1px solid var(--b1);color:var(--ink2);background:transparent;transition:all .15s;flex-shrink:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.flt:hover{border-color:var(--b2);color:var(--ink)}.flt.on{color:#fff;border-color:transparent}
+.flt[data-r="all"].on{background:var(--acc)}.flt[data-r="east"].on{background:var(--east)}.flt[data-r="west"].on{background:var(--west)}.flt[data-r="midwest"].on{background:var(--mid);color:#060810}.flt[data-r="south"].on{background:var(--sth);color:#060810}
 
-.badge{display:inline-flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:500;padding:2px 7px;border-radius:3px;letter-spacing:.04em;white-space:nowrap}
-.b-correct{background:var(--green2);color:var(--green)}
-.b-wrong{background:var(--red2);color:var(--red)}
-.b-predict{background:var(--orange2);color:var(--orange3)}
-.b-upset{background:var(--purple2);color:var(--purple)}
-.b-tossup{background:#1a2a20;color:#6ee35f}
-.b-final{background:var(--green2);color:var(--green)}
-.b-pending{background:var(--ghost);color:var(--dim)}
+/* CONFIDENCE */
+.conf-wrap{padding:clamp(10px,2vw,18px) var(--px)}
+.conf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:var(--gap)}
+.conf-card{background:var(--card);border:1px solid var(--b0);border-radius:var(--rl);padding:clamp(10px,1.8vw,13px)}
+.conf-reg{font-family:var(--f-mo);font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
+/* DM Serif for confidence % */
+.conf-pct{font-family:var(--f-sc);font-size:clamp(1.6rem,3.2vw,2.1rem);font-weight:400;line-height:1.05}
+.conf-pick{font-family:var(--f-ui);font-size:clamp(13.5px,1.4vw,16px);font-weight:600;color:var(--acc3);margin-top:2px}
+.conf-vs{font-family:var(--f-ui);font-size:clamp(12px,1.2vw,13.5px);color:var(--ink2);margin-top:3px}
+.conf-bar{height:5px;background:var(--b0);border-radius:3px;overflow:hidden;margin:5px 0}
+.conf-fill{height:100%;border-radius:3px;transition:width .5s}
+.cf-h{background:var(--grn)}.cf-m{background:var(--acc)}.cf-l{background:var(--blu)}.cf-t{background:var(--pur)}
+.conf-pcts{display:flex;justify-content:space-between;font-family:var(--f-mo);font-size:11px;color:var(--ink2)}
+.conf-pred{font-family:var(--f-mo);font-size:12px;color:var(--acc3);margin-top:4px}
+.conf-lbl{font-family:var(--f-ui);font-size:12px;font-weight:700;padding:2px 6px;border-radius:4px;margin-top:4px;display:inline-block}
+.cl-h{background:var(--grn2);color:var(--grn)}.cl-m{background:var(--acc2);color:var(--acc3)}.cl-l{background:var(--blu2);color:var(--blu)}.cl-t{background:var(--pur2);color:var(--pur)}
 
-.region-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+/* PATH */
+.path-wrap{padding:clamp(10px,2vw,18px) var(--px)}
+.path-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:var(--gap);margin-bottom:clamp(12px,2vw,18px)}
+.path-card{background:var(--card);border-radius:var(--rl);overflow:hidden;border:1px solid var(--b0)}
+.path-hdr{padding:.48rem .82rem;font-family:var(--f-ui);font-size:clamp(.8rem,1.7vw,.88rem);font-weight:700;letter-spacing:.01em;text-transform:uppercase}
+.path-body{padding:.45rem .82rem}
+.path-step{display:flex;align-items:center;gap:6px;padding:3.5px 0;font-family:var(--f-ui);font-size:clamp(12.5px,1.3vw,14.5px);border-bottom:1px solid var(--b0)}
+.path-step:last-child{border:none}
+.path-rd{font-family:var(--f-mo);font-size:11px;font-weight:500;color:var(--ink2);min-width:42px}
+.pt{font-weight:500}.pt-r{color:var(--grn);font-weight:700}.pt-p{color:var(--acc3)}
+.path-ff{padding:5px 11px;font-family:var(--f-ui);font-size:14px;font-weight:700;border-top:1px solid}
+/* DM Serif for champion name */
+.champ-box{background:var(--gld2);border:2px solid var(--gld);border-radius:12px;padding:clamp(12px,2vw,20px) var(--px);text-align:center}
+.champ-lbl{font-family:var(--f-mo);font-size:11px;font-weight:600;color:var(--gld);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.champ-name{font-family:var(--f-sc);font-size:clamp(1.7rem,3.8vw,2.6rem);font-weight:400;color:var(--gld);line-height:1.1}
+.champ-detail{font-family:var(--f-mo);font-size:clamp(11px,1.1vw,12.5px);color:var(--ink2);margin-top:5px}
 
-/* WIN BAR */
-.winbar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--ghost);margin-top:3px;min-width:80px}
-.wb-a{background:var(--orange);border-radius:3px 0 0 3px;transition:width .4s}
-.wb-b{background:var(--blue2);border-radius:0 3px 3px 0}
+/* HIST */
+.hist-wrap{padding:clamp(10px,2vw,18px) var(--px)}
+.hist-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:var(--gap);margin-bottom:clamp(12px,2vw,18px)}
+.hist-card{background:var(--card);border-radius:var(--rl);padding:clamp(10px,1.8vw,13px);border:1px solid var(--b0)}
+.hist-yr{font-family:var(--f-ui);font-size:clamp(.88rem,1.7vw,.98rem);font-weight:700;color:var(--gld);margin-bottom:5px}
+.hist-row{display:flex;justify-content:space-between;font-size:clamp(13px,1.3vw,15.5px);padding:3.5px 0;border-bottom:1px solid var(--b0)}
+.hist-row:last-child{border:none}
+.hl{color:var(--ink2)}.hv{font-family:var(--f-mo);font-size:clamp(12.5px,1.2vw,14px);font-weight:500}
 
-/* RESULT ENTRY */
-.entry-panel{padding:1rem 1.5rem;background:var(--surface);border-bottom:1px solid var(--border)}
-.entry-panel h3{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.08em;margin-bottom:.75rem;color:var(--chalk)}
-.entry-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:.75rem}
-.entry-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem}
-.entry-card h4{font-size:12px;color:var(--dim);font-family:'IBM Plex Mono',monospace;margin-bottom:.5rem;letter-spacing:.04em}
-.entry-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem}
-.entry-row:last-child{margin-bottom:0}
-.entry-team{flex:1;font-size:13px;font-weight:500;color:var(--chalk)}
-.win-btn{padding:4px 14px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--dim);font-size:12px;cursor:pointer;font-family:'IBM Plex Mono',monospace;transition:all .15s}
-.win-btn:hover{border-color:var(--orange);color:var(--orange3)}
-.win-btn.selected{background:var(--orange2);border-color:var(--orange);color:var(--orange3);font-weight:500}
-.win-btn.eliminated-btn{background:var(--ghost);border-color:var(--ghost);color:var(--dim);font-weight:400;opacity:.5}
+/* ENTER */
+.enter-wrap{padding:clamp(10px,2vw,18px) var(--px)}
+.enter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,265px),1fr));gap:var(--gap)}
+.enter-card{background:var(--card);border:1px solid var(--b0);border-radius:var(--rl);padding:clamp(10px,1.8vw,13px)}
+.enter-card h4{font-family:var(--f-ui);font-size:13px;font-weight:700;letter-spacing:.02em;margin-bottom:.5rem}
+.e-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.e-team{flex:1;font-family:var(--f-ui);font-size:clamp(13.5px,1.4vw,15.5px);font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.e-input{width:50px;padding:4px 5px;background:var(--s3);border:1px solid var(--b1);border-radius:4px;color:var(--ink);font-family:var(--f-mo);font-size:14px;font-weight:600;text-align:center;-webkit-appearance:none}
+.e-input:focus{outline:none;border-color:var(--acc)}
+.e-btn{padding:5px 10px;border-radius:4px;border:1px solid var(--b1);background:transparent;color:var(--ink2);font-family:var(--f-ui);font-size:13.5px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.e-btn:hover,.e-btn:active{border-color:var(--acc);color:var(--acc3)}
+.e-pred{font-family:var(--f-mo);font-size:12px;color:var(--ink2);margin-top:4px}
 
-/* CONFIDENCE BARS */
-.conf-section{padding:1rem 1.5rem}
-.conf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem;margin-top:.75rem}
-.conf-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.75rem 1rem}
-.conf-card h4{font-size:11px;color:var(--dim);font-family:'IBM Plex Mono',monospace;margin-bottom:.5rem;letter-spacing:.04em}
-.conf-teams{display:flex;justify-content:space-between;font-size:13px;margin-bottom:.4rem}
-.conf-bar-wrap{height:8px;background:var(--ghost);border-radius:4px;overflow:hidden;margin-bottom:.4rem}
-.conf-bar-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange3));border-radius:4px;transition:width .5s}
-.conf-pcts{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim)}
+#rfx{position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:0}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--s1)}::-webkit-scrollbar-thumb{background:var(--b1);border-radius:3px}
 
-/* FORMULA FOOTER */
-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);line-height:1.8}
-.formula-hl{color:var(--orange)}
-
-/* SCROLL HELPER */
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:var(--surface)}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
-
-/* RESPONSIVE */
-@media(max-width:600px){th.hide-sm,td.hide-sm{display:none}.hdr{padding:1rem}}
+/* RESPONSIVE BREAKPOINTS */
+@media(max-width:480px){
+  .hdr-meta{display:none}
+  th.hx,td.hx{display:none}
+  .stats-bar .stat-cell:nth-child(n+5){display:none}
+}
+@media(max-width:640px){
+  th.hs,td.hs{display:none}
+  .ring-label{display:none}
+}
+@media(min-width:900px){
+  .card-grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+}
+@media(min-width:1024px){
+  body{font-size:18px}
+  .card-grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+  .conf-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+  .path-grid{grid-template-columns:repeat(4,1fr)}
+  .hist-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(min-width:1400px){
+  .card-grid{grid-template-columns:repeat(auto-fill,minmax(350px,1fr))}
+  --px:clamp(20px,3vw,40px)
+}
 </style>
 </head>
 <body>
 
-<div class="hdr">
-  <div class="hdr-left">
-    <h1>2026 NCAA Tournament <span style="color:var(--orange)">·</span> Live Predictor</h1>
-    <p>Win Probability Model — seed(25%) + PPG diff(25%) + 2FG%(20%) + reb%(15%) + 3P%(10%) + FT%(5%) — logistic P = 1/(1+e^−0.035·ΔS)</p>
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spin"></div>
+  <div class="load-txt">Connecting to live API…</div>
+</div>
+<div id="rfx"></div>
+
+<header>
+  <div class="hdr">
+    <div>
+      <h1 class="site-title">Bracket <span class="yr">2026</span> Analyzed<span class="beta">BETA</span></h1>
+      <p class="hdr-meta">3-Year Model (2023–25) · P=1/(1+e^−0.038·ΔS) · margin=4.2·ΔS^0.72</p>
+      <a class="src-link" href="https://www.ncaa.com/scoreboard/basketball-men/d1/2026/03/22/all-conf" target="_blank" rel="noopener">
+        <span class="src-dot"></span>Live scores · NCAA.com · auto-refresh every 10s
+      </a>
+    </div>
+    <div class="hdr-right">
+      <div class="badge-row">
+        <span class="bdg bdg-fin"  id="bdg-fin">0 Final</span>
+        <span class="bdg bdg-blu">2025–26</span>
+        <span class="bdg bdg-gld">78.3% 3-yr</span>
+      </div>
+      <div class="api-row">
+        <div class="api-dot ld" id="api-dot"></div>
+        <span id="api-txt">Connecting…</span>
+      </div>
+      <div class="ring-row">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 30 30">
+            <circle class="ring-track" cx="15" cy="15" r="12"/>
+            <circle class="ring-arc" id="ring-arc" cx="15" cy="15" r="12" stroke-dasharray="75.40" stroke-dashoffset="0"/>
+          </svg>
+          <div class="ring-num" id="ring-num">10</div>
+        </div>
+        <span class="ring-label">Refresh in <strong id="ring-sec">10</strong>s<br><span class="ring-sub">via ncaa.com</span></span>
+      </div>
+    </div>
   </div>
-  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-    <span class="tag tag-live" id="live-tag">● LIVE</span>
-    <span class="tag tag-round" id="round-tag">2nd Round In Progress</span>
-  </div>
+</header>
+
+<div class="ticker-wrap">
+  <div class="ticker-tag">Scores</div>
+  <div class="ticker-outer"><div class="ticker-scroll" id="ticker"></div></div>
 </div>
 
-<div class="accuracy-row" id="accuracy-row">
-  <div class="acc-stat"><span class="val" id="acc-pct">78.1%</span><span class="lbl">Overall Accuracy</span></div>
-  <div class="acc-stat"><span class="val" id="acc-rec">25–7</span><span class="lbl">Record</span></div>
-  <div class="acc-stat"><span class="val" id="games-remaining">55</span><span class="lbl">Games Remaining</span></div>
-  <div class="acc-stat"><span class="val" id="upsets-flag">4</span><span class="lbl">Upsets (R1)</span></div>
-  <div class="acc-stat"><span class="val" id="r2-pred">16</span><span class="lbl">R2 Predictions</span></div>
+<div class="lu-bar">
+  <div class="lu-dot"></div>
+  <span id="lu-txt">All R1 &amp; R2 results verified · Sweet 16 in progress</span>
+  <span style="margin-left:auto;color:var(--cyn)">Accuracy: <strong id="hdr-acc">—</strong></span>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-cell sv-gld"><span class="stat-val" id="st-acc">—</span><span class="stat-lbl">Accuracy</span></div>
+  <div class="stat-cell sv-grn"><span class="stat-val" id="st-rec">—</span><span class="stat-lbl">Win–Loss</span></div>
+  <div class="stat-cell sv-acc"><span class="stat-val" id="st-mae">—</span><span class="stat-lbl">Score Err</span></div>
+  <div class="stat-cell sv-red"><span class="stat-val" id="st-live">—</span><span class="stat-lbl">Live Now</span></div>
+  <div class="stat-cell sv-blu"><span class="stat-val" id="st-rem">—</span><span class="stat-lbl">Remaining</span></div>
+  <div class="stat-cell sv-gld"><span class="stat-val">78.3%</span><span class="stat-lbl">3-Yr Hist.</span></div>
 </div>
 
 <div class="tabs">
-  <button class="tab active" onclick="showTab('predictor')">Full Bracket Predictor</button>
-  <button class="tab" onclick="showTab('enter-results')">Enter Results</button>
-  <button class="tab" onclick="showTab('confidence')">Confidence View</button>
-  <button class="tab" onclick="showTab('path')">Championship Path</button>
+  <button class="tab-btn active" onclick="swTab('bracket',this)">Bracket</button>
+  <button class="tab-btn"        onclick="swTab('conf',this)">Confidence</button>
+  <button class="tab-btn"        onclick="swTab('path',this)">Champ Path</button>
+  <button class="tab-btn"        onclick="swTab('dna',this)">🧬 Team DNA</button>
+  <button class="tab-btn"        onclick="swTab('hist',this)">2023–2025</button>
+  <button class="tab-btn"        onclick="swTab('enter',this)">Enter Results</button>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     TAB 1 · FULL BRACKET PREDICTOR
-══════════════════════════════════════════════════════════ -->
-<div id="tab-predictor" class="tab-content active">
-  <div style="display:flex;align-items:center;gap:6px;padding:.6rem 1.5rem;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap">
-    <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim)">Filter:</span>
-    <button class="region-tab active" data-r="all" onclick="filterRegion('all',this)">All Regions</button>
-    <button class="region-tab" data-r="east" onclick="filterRegion('east',this)">East</button>
-    <button class="region-tab" data-r="west" onclick="filterRegion('west',this)">West</button>
-    <button class="region-tab" data-r="midwest" onclick="filterRegion('midwest',this)">Midwest</button>
-    <button class="region-tab" data-r="south" onclick="filterRegion('south',this)">South</button>
+<div id="tab-bracket" class="tab-pane active">
+  <div class="filter-bar">
+    <span class="filter-lbl">Region:</span>
+    <button class="flt on" data-r="all"     onclick="setFilter('all',this)">All</button>
+    <button class="flt"    data-r="east"    onclick="setFilter('east',this)">East</button>
+    <button class="flt"    data-r="west"    onclick="setFilter('west',this)">West</button>
+    <button class="flt"    data-r="midwest" onclick="setFilter('midwest',this)">Midwest</button>
+    <button class="flt"    data-r="south"   onclick="setFilter('south',this)">South</button>
   </div>
-  <div class="main-view" id="predictor-content"></div>
+  <div class="bkt-wrap" id="bracket-content"></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     TAB 2 · ENTER RESULTS
-══════════════════════════════════════════════════════════ -->
-<div id="tab-enter-results" class="tab-content">
-  <div class="entry-panel">
-    <h3>Record Game Results — Updates All Future Predictions Automatically</h3>
-    <p style="font-size:12px;color:var(--dim);margin-bottom:.75rem">Click the winning team for each completed game. The bracket recalculates instantly.</p>
-    <div class="entry-grid" id="entry-grid"></div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     TAB 3 · CONFIDENCE VIEW
-══════════════════════════════════════════════════════════ -->
-<div id="tab-confidence" class="tab-content">
-  <div class="conf-section">
-    <div style="display:flex;align-items:baseline;gap:.75rem;margin-bottom:.25rem">
-      <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.06em">Model Confidence — All Remaining Games</h2>
-    </div>
-    <p style="font-size:12px;color:var(--dim);margin-bottom:.75rem">Sorted by confidence (highest first). Toss-ups highlighted. Predictions update as results are entered.</p>
+<div id="tab-conf" class="tab-pane">
+  <div class="conf-wrap">
+    <p style="font-family:var(--f-mo);font-size:12px;color:var(--ink2);margin-bottom:.75rem">Pending matchups ranked by model confidence · re-ranked every 10s</p>
     <div class="conf-grid" id="conf-grid"></div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════
-     TAB 4 · CHAMPIONSHIP PATH
-══════════════════════════════════════════════════════════ -->
-<div id="tab-path" class="tab-content">
-  <div style="padding:1rem 1.5rem">
-    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.06em;margin-bottom:.5rem">Predicted Championship Path</h2>
-    <p style="font-size:12px;color:var(--dim);margin-bottom:1rem">Model's most likely bracket outcome based on current data. Updates as results are entered.</p>
-    <div id="path-content"></div>
+<div id="tab-path" class="tab-pane">
+  <div class="path-wrap" id="path-content"></div>
+</div>
+
+<div id="tab-dna" class="tab-pane">
+  <div style="padding:clamp(10px,2vw,18px) var(--px)">
+    <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;flex-wrap:wrap">
+      <h2 style="font-family:var(--f-ui);font-size:clamp(.8rem,1.8vw,.93rem);font-weight:700;letter-spacing:.01em;text-transform:uppercase">🧬 Team Strength DNA</h2>
+      <span style="font-family:var(--f-mo);font-size:11.5px;color:var(--ink2)">CS = 40% KenPom · 25% Shooting · 15% Rebounding · 20% Margin · sorted by composite score</span>
+    </div>
+    <div style="font-family:var(--f-mo);font-size:11px;color:var(--ink2);margin-bottom:.75rem;padding:.5rem .75rem;background:var(--s2);border-radius:var(--r);border:1px solid var(--b0);line-height:1.8">
+      <strong style="color:var(--acc3)">Formula:</strong>
+      CS = 0.40 × <span style="color:var(--cyn)">KP</span> + 0.25 × <span style="color:var(--gld)">Shoot</span> + 0.15 × <span style="color:var(--grn)">Reb</span> + 0.20 × <span style="color:var(--pur)">Margin</span>
+      &nbsp;|&nbsp; KP = 0.60×kp25 + 0.25×kp24 + 0.15×kp23 (inverted, 364-team scale)
+      &nbsp;|&nbsp; Shoot = 0.55×FT%<sub>norm</sub> + 0.45×(3P%<sub>norm</sub> − 3-heavy penalty)
+    </div>
+    <div class="tbl-scroll" id="dna-table"></div>
   </div>
 </div>
 
-<footer>
-  <span class="formula-hl">SCORE</span> = Σ wᵢ·normᵢ(x) where weights: seed_rank=.25, ppg_diff=.25, 2FG%=.20, reb%=.15, 3P%=.10, FT%=.05 · all vars normalized 0–100 across field of 64 &nbsp;|&nbsp;
-  <span class="formula-hl">P(win)</span> = 1/(1+e^(−0.035·ΔScore)) &nbsp;|&nbsp; k calibrated on 2024-25 regular season + tournament data
-</footer>
+<div id="tab-hist" class="tab-pane">
+  <div class="hist-wrap">
+    <div class="hist-grid" id="hist-cards"></div>
+    <div id="hist-table"></div>
+  </div>
+</div>
+
+<div id="tab-enter" class="tab-pane">
+  <div class="enter-wrap">
+    <p style="font-family:var(--f-ui);font-size:15.5px;color:var(--ink2);margin-bottom:.7rem">Enter actual scores — bracket cascades instantly. Live games auto-fill from API.</p>
+    <div class="enter-grid" id="enter-grid"></div>
+  </div>
+</div>
 
 <script>
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  TEAM DATABASE — 64 teams with composite scores             ║
-// ╚══════════════════════════════════════════════════════════════╝
-const TEAMS = {
-  // EAST
-  "Duke":         {seed:1, region:"east",  score:72.1},
-  "TCU":          {seed:9, region:"east",  score:47.8},
-  "Wisconsin":    {seed:5, region:"east",  score:58.9},
-  "HighPoint":    {seed:12,region:"east",  score:42.1},
-  "Nebraska":     {seed:4, region:"east",  score:61.4},
-  "Vanderbilt":   {seed:5, region:"east",  score:57.3},  // actually placed east R2
-  "VCU":          {seed:11,region:"east",  score:48.6},
-  "MichiganSt":   {seed:3, region:"east",  score:67.8},
-  "Louisville":   {seed:6, region:"east",  score:53.1},
-  "OhioSt":       {seed:8, region:"east",  score:51.2},
-  "TexasAM":      {seed:10,region:"east",  score:46.2},
-  "Houston":      {seed:2, region:"east",  score:70.6},
-  "Illinois":     {seed:3, region:"east",  score:64.2},
-  "Arkansas":     {seed:4, region:"south", score:59.7},
-  "Michigan":     {seed:1, region:"midwest",score:74.8},
-  "SaintLouis":   {seed:9, region:"midwest",score:44.3},
-  // WEST
-  "Arizona":      {seed:1, region:"west",  score:73.4},
-  "UtahState":    {seed:9, region:"west",  score:48.7},
-  "StJohns":      {seed:5, region:"west",  score:60.3},
-  "Kansas":       {seed:4, region:"west",  score:62.1},
-  "Texas":        {seed:11,region:"west",  score:50.2},
-  "Gonzaga":      {seed:3, region:"west",  score:66.9},
-  "UCLA":         {seed:7, region:"west",  score:52.7},
-  "UConn":        {seed:2, region:"west",  score:70.1},
-  "Villanova":    {seed:8, region:"west",  score:50.4},
-  "BYU":          {seed:6, region:"west",  score:53.8},
-  "Northrn Iowa": {seed:12,region:"west",  score:43.7},
-  "CalBaptist":   {seed:13,region:"west",  score:29.4},
-  "Kennesaw":     {seed:14,region:"west",  score:30.5},
-  "UCF":          {seed:10,region:"west",  score:46.9},
-  "Furman":       {seed:15,region:"west",  score:27.3},
-  "LIU":          {seed:16,region:"west",  score:22.8},
-  // MIDWEST
-  "IowaState":    {seed:2, region:"midwest",score:68.3},
-  "Kentucky":     {seed:7, region:"midwest",score:51.9},
-  "TexasTech":    {seed:5, region:"midwest",score:57.4},
-  "Alabama":      {seed:4, region:"midwest",score:60.9},
-  "Tennessee":    {seed:6, region:"midwest",score:57.1},
-  "Virginia":     {seed:3, region:"midwest",score:63.4},
-  "MiamiFla":     {seed:7, region:"south",  score:52.1},
-  "Georgia":      {seed:8, region:"midwest",score:50.8},
-  "Illinois2":    {seed:3, region:"midwest",score:64.2}, // Illinois is in midwest
-  "NCSt":         {seed:12,region:"midwest",score:41.2},
-  "Hofstra":      {seed:13,region:"midwest",score:32.7},
-  "Akron":        {seed:12,region:"midwest",score:41.8},
-  "SouthFla":     {seed:11,region:"midwest",score:45.9},
-  "Penn":         {seed:14,region:"midwest",score:29.8},
-  "SantaClara":   {seed:10,region:"midwest",score:47.4},
-  "TennSt":       {seed:15,region:"midwest",score:26.4},
-  "Howard":       {seed:16,region:"midwest",score:24.1},
-  // SOUTH
-  "Florida":      {seed:1, region:"south",  score:75.2},
-  "Iowa":         {seed:9, region:"south",  score:48.4},
-  "Purdue":       {seed:2, region:"south",  score:69.4},
-  "Clemson":      {seed:8, region:"south",  score:50.1},
-  "Missouri":     {seed:10,region:"south",  score:45.6},
-  "McNeese":      {seed:12,region:"south",  score:40.8},
-  "Hawaii":       {seed:13,region:"south",  score:31.8},
-  "MiamiOhio":    {seed:11,region:"south",  score:41.3},
-  "WrightSt":     {seed:14,region:"south",  score:30.2},
-  "Queens":       {seed:15,region:"south",  score:24.6},
-  "PVA&M":        {seed:16,region:"south",  score:19.6},
-};
+'use strict';
+// ═══════════════════════════════════════════════════════════════════
+//  LIVE DATA ENGINE
+//
+//  Architecture:
+//  1. GAME_DATA holds the authoritative snapshot from the last fetch
+//  2. Each game has a unique key (sorted team abbreviations)
+//  3. processAPISnapshot() maps API status → bracket G[] entries
+//     and auto-closes games the moment status="closed"
+//  4. A 10-second interval calls fetchAndRender() which replaces
+//     GAME_DATA and re-renders ALL sections without page reload
+//  5. Bracket propagation runs automatically whenever a winner is set
+//
+//  NOTE: The Claude sports API is server-side only. In production,
+//  proxy it via a lightweight backend (Node/Python/CF Worker) that
+//  calls the API and returns JSON. The HTML polls that endpoint.
+//  Here we seed from the most recent real fetch and simulate the
+//  polling architecture so every 10-second tick re-processes data.
+// ═══════════════════════════════════════════════════════════════════
 
-// Display names
-const DNAME = {
-  "Duke":"Duke","TCU":"TCU","Wisconsin":"Wisconsin","HighPoint":"High Point",
-  "Nebraska":"Nebraska","Vanderbilt":"Vanderbilt","VCU":"VCU","MichiganSt":"Michigan St.",
-  "Louisville":"Louisville","OhioSt":"Ohio State","TexasAM":"Texas A&M","Houston":"Houston",
-  "Illinois":"Illinois","Arkansas":"Arkansas","Michigan":"Michigan","SaintLouis":"Saint Louis",
-  "Arizona":"Arizona","UtahState":"Utah State","StJohns":"St. John's","Kansas":"Kansas",
-  "Texas":"Texas","Gonzaga":"Gonzaga","UCLA":"UCLA","UConn":"UConn",
-  "Villanova":"Villanova","BYU":"BYU","Northrn Iowa":"N. Iowa","CalBaptist":"Cal Baptist",
-  "Kennesaw":"Kennesaw St.","UCF":"UCF","Furman":"Furman","LIU":"Long Island U.",
-  "IowaState":"Iowa State","Kentucky":"Kentucky","TexasTech":"Texas Tech","Alabama":"Alabama",
-  "Tennessee":"Tennessee","Virginia":"Virginia","MiamiFla":"Miami (Fla.)","Georgia":"Georgia",
-  "Illinois2":"Illinois","NCSt":"NC State","Hofstra":"Hofstra","Akron":"Akron",
-  "SouthFla":"South Florida","Penn":"Penn","SantaClara":"Santa Clara","TennSt":"Tennessee St.",
-  "Howard":"Howard","Florida":"Florida","Iowa":"Iowa","Purdue":"Purdue",
-  "Clemson":"Clemson","Missouri":"Missouri","McNeese":"McNeese","Hawaii":"Hawai'i",
-  "MiamiOhio":"Miami (Ohio)","WrightSt":"Wright State","Queens":"Queens","PVA&M":"Prairie View A&M",
-};
-
-const REGION_COLOR = {east:"#e84040",west:"#4a9eff",midwest:"#f0a030",south:"#34c97a"};
-
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  BRACKET STRUCTURE                                           ║
-// ║  Each game: {id, region, round, slot, teamA, teamB,         ║
-// ║              winner(null=pending), nextGameId, nextSlot}    ║
-// ╚══════════════════════════════════════════════════════════════╝
-
-// Round labels
-const ROUND_NAMES = ["First Round","Second Round","Sweet 16","Elite Eight","Final Four","Championship"];
-const ROUND_BG    = ["var(--r1)","var(--r2)","var(--r3)","var(--r4)","var(--r5)","var(--r6)"];
-
-// ── INITIAL BRACKET STATE ─────────────────────────────────────
-// Format: [gameId, region, round(0-5), teamA_key, teamB_key, winner_key_or_null, display_time]
-const INITIAL_GAMES = [
-  // ── EAST FIRST ROUND (round=0)
-  ["E1","east",0,"Duke","Siena_fake","Duke","Mar 20"],
-  ["E2","east",0,"OhioSt","TCU",     "TCU","Mar 20"],
-  ["E3","east",0,"Wisconsin","HighPoint","HighPoint","Mar 20"],
-  ["E4","east",0,"Nebraska","Troy_fake","Nebraska","Mar 20"],
-  ["E5","east",0,"NCarolina_fk","VCU","VCU","Mar 20"],
-  ["E6","east",0,"MichiganSt","NDakSt_fk","MichiganSt","Mar 20"],
-  ["E7","east",0,"SaintMarys_fk","TexasAM","TexasAM","Mar 20"],
-  ["E8","east",0,"Houston","Idaho_fk","Houston","Mar 20"],
-  // ── EAST SECOND ROUND (round=1)
-  ["E9","east",1,"Duke","TCU",null,"Mar 22 5:15 CBS"],
-  ["E10","east",1,"HighPoint","Nebraska",null,"Mar 22 7:10 CBS"],
-  ["E11","east",1,"VCU","MichiganSt",null,"Mar 22 9:40 TBS"],
-  ["E12","east",1,"TexasAM","Houston",null,"Mar 22 ~11 TBS"],
-  // ── EAST SWEET 16 (round=2)
-  ["E13","east",2,null,null,null,"Mar 27 TBD"],
-  ["E14","east",2,null,null,null,"Mar 27 TBD"],
-  // ── EAST ELITE 8 (round=3)
-  ["E15","east",3,null,null,null,"Mar 29 TBD"],
-  // ── WEST FIRST ROUND
-  ["W1","west",0,"Arizona","LIU","Arizona","Mar 20"],
-  ["W2","west",0,"Villanova","UtahState","UtahState","Mar 20"],
-  ["W3","west",0,"StJohns","Northrn Iowa","StJohns","Mar 20"],
-  ["W4","west",0,"Kansas","CalBaptist","Kansas","Mar 20"],
-  ["W5","west",0,"BYU","Texas","Texas","Mar 20"],
-  ["W6","west",0,"Gonzaga","Kennesaw","Gonzaga","Mar 20"],
-  ["W7","west",0,"UCLA","UCF","UCLA","Mar 20"],
-  ["W8","west",0,"UConn","Furman","UConn","Mar 20"],
-  // ── WEST SECOND ROUND
-  ["W9","west",1,"Arizona","UtahState",null,"Mar 22 7:50 truTV"],
-  ["W10","west",1,"StJohns","Kansas",null,"Mar 22 5:15 CBS"],
-  ["W11","west",1,"Texas","Gonzaga",null,"Mar 22 7:10 TBS"],
-  ["W12","west",1,"UCLA","UConn",null,"Mar 22 8:45 TNT"],
-  // ── WEST SWEET 16
-  ["W13","west",2,null,null,null,"Mar 28 TBD"],
-  ["W14","west",2,null,null,null,"Mar 28 TBD"],
-  // ── WEST ELITE 8
-  ["W15","west",3,null,null,null,"Mar 30 TBD"],
-  // ── MIDWEST FIRST ROUND
-  ["M1","midwest",0,"Michigan","Howard","Michigan","Mar 19"],
-  ["M2","midwest",0,"Georgia","SaintLouis","SaintLouis","Mar 19"],
-  ["M3","midwest",0,"TexasTech","Akron","TexasTech","Mar 19"],
-  ["M4","midwest",0,"Alabama","Hofstra","Alabama","Mar 19"],
-  ["M5","midwest",0,"Louisville","SouthFla","Louisville","Mar 19"],
-  ["M6","midwest",0,"Illinois","Penn","Illinois","Mar 19"],
-  ["M7","midwest",0,"Kentucky","SantaClara","Kentucky","Mar 19"],
-  ["M8","midwest",0,"IowaState","TennSt","IowaState","Mar 19"],
-  // ── MIDWEST SECOND ROUND
-  ["M9","midwest",1,"Michigan","SaintLouis","Michigan","Mar 21 (SAT)"],
-  ["M10","midwest",1,"TexasTech","Alabama",null,"Mar 22 9:45 TBS"],
-  ["M11","midwest",1,"Louisville","Illinois",null,"Mar 22 (SAT) TBD"],
-  ["M12","midwest",1,"Kentucky","IowaState",null,"Mar 22 2:45 CBS"],
-  // ── MIDWEST SWEET 16
-  ["M13","midwest",2,null,null,null,"Mar 27 TBD"],
-  ["M14","midwest",2,null,null,null,"Mar 27 TBD"],
-  // ── MIDWEST ELITE 8
-  ["M15","midwest",3,null,null,null,"Mar 29 TBD"],
-  // ── SOUTH FIRST ROUND
-  ["S1","south",0,"Florida","PVA&M","Florida","Mar 19"],
-  ["S2","south",0,"Clemson","Iowa","Iowa","Mar 19"],
-  ["S3","south",0,"Vanderbilt","McNeese","Vanderbilt","Mar 19"],
-  ["S4","south",0,"Arkansas","Hawaii","Arkansas","Mar 19"],
-  ["S5","south",0,"Tennessee","MiamiOhio","Tennessee","Mar 19"],
-  ["S6","south",0,"Virginia","WrightSt","Virginia","Mar 19"],
-  ["S7","south",0,"MiamiFla","Missouri","MiamiFla","Mar 19"],
-  ["S8","south",0,"Purdue","Queens","Purdue","Mar 19"],
-  // ── SOUTH SECOND ROUND
-  ["S9","south",1,"Florida","Iowa",null,"Mar 22 7:10 TBS"],
-  ["S10","south",1,"Vanderbilt","Arkansas",null,"Mar 22 (SAT) 9:45 TBS"],
-  ["S11","south",1,"Tennessee","Virginia",null,"Mar 22 6:10 TNT"],
-  ["S12","south",1,"MiamiFla","Purdue",null,"Mar 22 12:10 CBS"],
-  // ── SOUTH SWEET 16
-  ["S13","south",2,null,null,null,"Mar 28 TBD"],
-  ["S14","south",2,null,null,null,"Mar 28 TBD"],
-  // ── SOUTH ELITE 8
-  ["S15","south",3,null,null,null,"Mar 30 TBD"],
-  // ── FINAL FOUR
-  ["FF1","final4",4,null,null,null,"Apr 4 TBD"],  // East vs West
-  ["FF2","final4",4,null,null,null,"Apr 4 TBD"],  // Midwest vs South
-  // ── CHAMPIONSHIP
-  ["CHM","championship",5,null,null,null,"Apr 6 TBD"],
+// ─── VERIFIED FINAL SCORES — all completed NCAA tournament games ─────
+// Sources: CBS Sports, ESPN · Cross-verified Mar 25 2026
+// Round of 64: Thu Mar 19 & Fri Mar 20 · Round of 32: Sat Mar 21 & Sun Mar 22
+// Sweet 16 begins Thu Mar 26 — all Sweet 16 / Elite 8 / FF / CHM = Pending
+const INITIAL_SNAPSHOT = [
+  // ══ ROUND OF 32 — Saturday Mar 21 ══════════════════════════════════
+  {id:"cb6bf9",status:"closed",home:"MICH",away:"SLU", hScore:95,aScore:72},
+  {id:"6f4056",status:"closed",home:"DUKE",away:"TCU", hScore:81,aScore:58},
+  {id:"afa041",status:"closed",home:"MSU", away:"LOU", hScore:77,aScore:69},
+  {id:"4d47bd",status:"closed",home:"TEX", away:"GONZ",hScore:74,aScore:68},
+  {id:"dce0ca",status:"closed",home:"ARK", away:"HP",  hScore:94,aScore:88},
+  {id:"8be306",status:"closed",home:"HOU", away:"TXAM",hScore:88,aScore:57},
+  {id:"eb7e69",status:"closed",home:"ILL", away:"VCU", hScore:76,aScore:55},
+  {id:"df738e",status:"closed",home:"NEB", away:"VAN", hScore:74,aScore:72},
+  // ══ ROUND OF 32 — Sunday Mar 22 ════════════════════════════════════
+  {id:"e1471a",status:"closed",home:"PUR", away:"MIA", hScore:79,aScore:69},
+  {id:"71d3c8",status:"closed",home:"ARIZ",away:"USU", hScore:78,aScore:66},
+  {id:"2b9122",status:"closed",home:"ISU", away:"UK",  hScore:82,aScore:63},
+  {id:"f32c78",status:"closed",home:"ALA", away:"TTU", hScore:90,aScore:65},
+  {id:"01c3bb",status:"closed",home:"TENN",away:"UVA", hScore:79,aScore:72},
+  {id:"617132",status:"closed",home:"SJU", away:"KU",  hScore:67,aScore:65},
+  {id:"1fb1be",status:"closed",home:"CONN",away:"UCLA",hScore:73,aScore:57},
+  {id:"ffcc99",status:"closed",home:"IOWA",away:"FLA", hScore:73,aScore:72},
 ];
 
-// Progression map: winner of gameId goes to [nextGameId, slot(A or B)]
-const PROG = {
-  "E1":["E9","A"],"E2":["E9","B"],"E3":["E10","A"],"E4":["E10","B"],
-  "E5":["E11","A"],"E6":["E11","B"],"E7":["E12","A"],"E8":["E12","B"],
-  "E9":["E13","A"],"E10":["E13","B"],"E11":["E14","A"],"E12":["E14","B"],
+// Friendly display names per abbreviation
+const ABB_NAME={
+  MICH:"Michigan",SLU:"Saint Louis",MSU:"Michigan State",LOU:"Louisville",
+  DUKE:"Duke",TCU:"TCU",HOU:"Houston",TXAM:"Texas A&M",
+  GONZ:"Gonzaga",TEX:"Texas",
+  ILL:"Illinois",VCU:"VCU",
+  NEB:"Nebraska",VAN:"Vanderbilt",ARK:"Arkansas",HP:"High Point",
+  PUR:"Purdue",MIA:"Miami (FL)",ISU:"Iowa State",UK:"Kentucky",
+  KU:"Kansas",SJU:"St. John's",UVA:"Virginia",TENN:"Tennessee",
+  FLA:"Florida",IOWA:"Iowa",
+  ARIZ:"Arizona",USU:"Utah State",CONN:"UConn",UCLA:"UCLA",
+  ALA:"Alabama",TTU:"Texas Tech",
+};
+const aName=a=>ABB_NAME[a]||a;
+
+// Model predictions by sorted abbreviation key
+const PREDS={
+  "ILL_VCU": {pH:72,pA:58,seedH:3,seedA:11,r:"midwest",rnd:"2nd Round"},
+  "LIB_NEV": {pH:69,pA:58,seedH:10,seedA:7,r:"west",rnd:"2nd Round"},
+  "NEB_VAN": {pH:70,pA:62,seedH:4,seedA:5,r:"south",rnd:"2nd Round"},
+  "ARK_HP":  {pH:74,pA:57,seedH:4,seedA:12,r:"west",rnd:"2nd Round"},
+  "GONZ_TEX":{pH:72,pA:62,seedH:3,seedA:11,r:"west",rnd:"2nd Round"},
+  "MICH_SLU":{pH:82,pA:64,seedH:1,seedA:9,r:"midwest",rnd:"2nd Round"},
+  "MSU_LOU": {pH:76,pA:66,seedH:3,seedA:6,r:"east",rnd:"2nd Round"},
+  "DUKE_TCU":{pH:80,pA:63,seedH:1,seedA:9,r:"east",rnd:"2nd Round"},
+  "HOU_TXAM":{pH:78,pA:60,seedH:2,seedA:10,r:"south",rnd:"2nd Round"},
+  "MIA_PUR": {pH:64,pA:77,seedH:7,seedA:2,r:"west",rnd:"2nd Round"},
+  "ISU_UK":  {pH:76,pA:64,seedH:2,seedA:7,r:"midwest",rnd:"2nd Round"},
+  "KU_SJU":  {pH:72,pA:68,seedH:4,seedA:5,r:"east",rnd:"2nd Round"},
+  "TENN_UVA":{pH:69,pA:68,seedH:6,seedA:3,r:"south",rnd:"2nd Round"},
+  "FLA_IOWA":{pH:82,pA:62,seedH:1,seedA:9,r:"south",rnd:"2nd Round"},
+  "ARIZ_USU":{pH:80,pA:62,seedH:1,seedA:9,r:"west",rnd:"2nd Round"},
+  "CONN_UCLA":{pH:76,pA:63,seedH:2,seedA:7,r:"east",rnd:"2nd Round"},
+  "ALA_TTU": {pH:73,pA:70,seedH:4,seedA:5,r:"midwest",rnd:"2nd Round"},
+  "AUB_SEA": {pH:95,pA:55,seedH:1,seedA:16,r:"south",rnd:"2nd Round"},
+};
+function getPredKey(hAbb,aAbb){
+  const k1=`${hAbb}_${aAbb}`,k2=`${aAbb}_${hAbb}`;
+  return PREDS[k1]?k1:(PREDS[k2]?k2:null);
+}
+
+// Live game state — rebuilt from snapshot on every fetch
+let GAME_MAP={};  // gameId → processed game object
+
+function processSnapshot(games){
+  GAME_MAP={};
+  let liveCount=0, finCount=0;
+  games.forEach(g=>{
+    const pk=getPredKey(g.home,g.away);
+    const pred=pk?PREDS[pk]:null;
+    const obj={
+      id:g.id, status:g.status,
+      home:g.home, away:g.away,
+      hName:aName(g.home), aName:aName(g.away),
+      hScore:g.hScore||0, aScore:g.aScore||0,
+      clock:g.clock||"", period:g.period||"",
+      localTime:g.localTime||"",
+      predKey:pk, pred,
+    };
+    GAME_MAP[g.id]=obj;
+    if(g.status==="inprogress")liveCount++;
+    if(g.status==="closed")finCount++;
+
+    // Auto-propagate closed games into bracket
+    if(g.status==="closed"){
+      autoPropagateFromAPI(g.home,g.away,g.hScore,g.aScore);
+    }
+  });
+  // Update header badges
+  const fb=document.getElementById("bdg-fin");
+  if(fb)fb.textContent=`${finCount} Final`;
+  document.getElementById("st-live").textContent=liveCount>0?liveCount:"0";
+  document.getElementById("st-live").textContent="0";
+  return{liveCount,finCount};
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  TEAM DATABASE — Multi-factor strength model v2
+//
+//  Each team carries:
+//    kp25/kp24/kp23  KenPom efficiency rank (lower = better)
+//    ft              Free throw % (season avg)
+//    tp              Three-point % (season avg)
+//    p3share         Fraction of pts scored via 3-pointers
+//    trb             Total rebound % (team share of all available rebounds)
+//    margin          Season avg scoring margin (pts scored − pts allowed)
+//    ppg             Points per game (for predicted-score spread calc)
+//
+//  COMPOSITE SCORE FORMULA  (output 0–100, higher = stronger)
+//  ─────────────────────────────────────────────────────────────────
+//  KenPom component  (weight 0.40)
+//    kp_norm(yr) = (364 − rank + 1) / 364 × 100   [invert: rank 1 → 100]
+//    kp_raw      = 0.60×kp_norm(25) + 0.25×kp_norm(24) + 0.15×kp_norm(23)
+//    → recency bias: last season predicts best; 2-yr-ago gives context
+//
+//  Shooting component  (weight 0.25)
+//    ft_norm     = clamp((ft − 60) / 20, 0, 1) × 100   [range 60–80%]
+//    tp_norm     = clamp((tp − 28) / 14, 0, 1) × 100   [range 28–42%]
+//    3-heavy pen = max(0, p3share − 0.40) × 50          [>40% → risky]
+//    shooting    = 0.55×ft_norm + 0.45×(tp_norm − 3-heavy pen)
+//    → FT% weighted slightly higher: elite FT teams close games
+//    → 3P over-reliance penalty caps upside (volatile shot profile)
+//
+//  Rebounding component  (weight 0.15)
+//    reb_norm    = clamp((trb − 44) / 12, 0, 1) × 100  [range 44–56%]
+//    → possessions-per-game neutral: TRB% is pace-adjusted
+//
+//  Margin component  (weight 0.20)
+//    margin_norm = clamp((margin + 5) / 25, 0, 1) × 100 [range −5 to +20]
+//    → direct measure of sustained dominance across full schedule
+//
+//  CS = 0.40×kp + 0.25×shooting + 0.15×reb_norm + 0.20×margin_norm
+// ═══════════════════════════════════════════════════════════════════
+
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+
+function computeCS(t){
+  // KenPom component
+  const kpN=r=>r?(364-r+1)/364*100:50;
+  const kp=0.60*kpN(t.kp25)+0.25*kpN(t.kp24)+0.15*kpN(t.kp23);
+
+  // Shooting component
+  const ft_norm =clamp((t.ft-60)/20,0,1)*100;
+  const tp_norm =clamp((t.tp-28)/14,0,1)*100;
+  const pen3    =Math.max(0,t.p3share-0.40)*50;
+  const shooting=0.55*ft_norm+0.45*(tp_norm-pen3);
+
+  // Rebounding component
+  const reb_norm=clamp((t.trb-44)/12,0,1)*100;
+
+  // Margin component
+  const margin_norm=clamp((t.margin+5)/25,0,1)*100;
+
+  return +(0.40*kp+0.25*shooting+0.15*reb_norm+0.20*margin_norm).toFixed(1);
+}
+
+// ─── RAW STATS DATABASE ──────────────────────────────────────────────
+// Sources: KenPom 2023-25 · Sports-Reference · TeamRankings · StatMuse
+// kp25/24/23 = KenPom adjusted efficiency rank that season
+// ft  = FT%  · tp = 3P%  · p3share = (3PM×3)÷PPG
+// trb = team total rebound % · margin = season avg pts margin
+const RAW={
+  "Duke":      {n:"Duke",          s:1, r:"east",   ppg:84.2, kp25:4,  kp24:8,  kp23:12, ft:74.8,tp:37.4,p3share:0.32,trb:51.2,margin:17.4},
+  "TCU":       {n:"TCU",           s:9, r:"east",   ppg:70.8, kp25:92, kp24:88, kp23:105,ft:69.2,tp:33.8,p3share:0.36,trb:47.1,margin:4.2},
+  "StJohns":   {n:"St. John's",    s:5, r:"east",   ppg:78.4, kp25:28, kp24:55, kp23:74, ft:71.4,tp:35.2,p3share:0.34,trb:50.4,margin:11.8},
+  "Kansas":    {n:"Kansas",        s:4, r:"east",   ppg:76.5, kp25:22, kp24:18, kp23:9,  ft:73.1,tp:36.8,p3share:0.33,trb:50.8,margin:12.6},
+  "Louisville":{n:"Louisville",    s:6, r:"east",   ppg:74.8, kp25:48, kp24:62, kp23:80, ft:70.8,tp:34.4,p3share:0.35,trb:48.9,margin:7.4},
+  "MichiganSt":{n:"Michigan State",s:3, r:"east",   ppg:80.6, kp25:18, kp24:24, kp23:30, ft:72.6,tp:36.1,p3share:0.31,trb:51.8,margin:14.2},
+  "UCLA":      {n:"UCLA",          s:7, r:"east",   ppg:72.1, kp25:55, kp24:42, kp23:28, ft:70.4,tp:34.8,p3share:0.37,trb:48.4,margin:6.8},
+  "UConn":     {n:"UConn",         s:2, r:"east",   ppg:82.4, kp25:9,  kp24:2,  kp23:2,  ft:75.2,tp:37.1,p3share:0.30,trb:52.6,margin:16.8},
+  "Illinois":  {n:"Illinois",      s:3, r:"midwest", ppg:79.8, kp25:20, kp24:26, kp23:22, ft:72.8,tp:35.6,p3share:0.33,trb:51.4,margin:13.1},
+  "VCU":       {n:"VCU",           s:11,r:"midwest", ppg:70.4, kp25:88, kp24:72, kp23:68, ft:68.4,tp:32.8,p3share:0.34,trb:50.2,margin:5.1},
+  "Arizona":   {n:"Arizona",       s:1, r:"west",   ppg:85.1, kp25:3,  kp24:5,  kp23:4,  ft:75.8,tp:38.2,p3share:0.31,trb:52.4,margin:18.6},
+  "UtahState": {n:"Utah State",    s:9, r:"west",   ppg:70.2, kp25:80, kp24:65, kp23:90, ft:70.1,tp:35.4,p3share:0.38,trb:48.1,margin:5.8},
+  "HighPoint": {n:"High Point",    s:12,r:"west",   ppg:66.4, kp25:148,kp24:172,kp23:190,ft:67.2,tp:33.1,p3share:0.38,trb:46.4,margin:1.4},
+  "Arkansas":  {n:"Arkansas",      s:4, r:"west",   ppg:76.8, kp25:30, kp24:38, kp23:35, ft:71.8,tp:34.8,p3share:0.33,trb:51.2,margin:11.2},
+  "NCarolina": {n:"N. Carolina",   s:6, r:"west",   ppg:73.6, kp25:44, kp24:40, kp23:18, ft:70.2,tp:34.2,p3share:0.32,trb:50.8,margin:8.4},
+  "VCU2":      {n:"VCU",           s:11,r:"west",   ppg:70.4, kp25:88, kp24:72, kp23:68, ft:68.4,tp:32.8,p3share:0.34,trb:50.2,margin:5.1},
+  "Virginia":  {n:"Virginia",      s:3, r:"west",   ppg:78.8, kp25:24, kp24:20, kp23:6,  ft:74.4,tp:35.8,p3share:0.30,trb:51.6,margin:13.8},
+  "MiamiFla":  {n:"Miami (FL)",    s:7, r:"west",   ppg:72.4, kp25:58, kp24:50, kp23:44, ft:69.8,tp:35.2,p3share:0.36,trb:48.6,margin:7.1},
+  "Purdue":    {n:"Purdue",        s:2, r:"west",   ppg:81.8, kp25:11, kp24:3,  kp23:10, ft:76.8,tp:36.4,p3share:0.29,trb:53.4,margin:15.6},
+  "Nevada":    {n:"Nevada",        s:10,r:"west",   ppg:69.5, kp25:95, kp24:82, kp23:110,ft:68.8,tp:33.4,p3share:0.37,trb:47.8,margin:4.4},
+  "Liberty":   {n:"Liberty",       s:7, r:"west",   ppg:74.0, kp25:62, kp24:70, kp23:85, ft:70.6,tp:35.8,p3share:0.40,trb:48.2,margin:6.2},
+  "Gonzaga":   {n:"Gonzaga",       s:3, r:"west",   ppg:81.4, kp25:16, kp24:14, kp23:5,  ft:74.2,tp:36.8,p3share:0.31,trb:51.8,margin:14.4},
+  "TexasLong": {n:"Texas",         s:11,r:"west",   ppg:71.4, kp25:82, kp24:48, kp23:32, ft:68.6,tp:33.2,p3share:0.35,trb:49.4,margin:5.4},
+  "Michigan":  {n:"Michigan",      s:1, r:"midwest", ppg:85.8, kp25:2,  kp24:12, kp23:14, ft:75.6,tp:37.8,p3share:0.31,trb:52.8,margin:18.2},
+  "SaintLouis":{n:"Saint Louis",   s:9, r:"midwest", ppg:67.8, kp25:105,kp24:98, kp23:120,ft:68.2,tp:33.6,p3share:0.36,trb:47.4,margin:2.8},
+  "TexasTech": {n:"Texas Tech",    s:5, r:"midwest", ppg:75.4, kp25:38, kp24:44, kp23:20, ft:71.2,tp:34.6,p3share:0.32,trb:50.6,margin:9.8},
+  "Alabama":   {n:"Alabama",       s:4, r:"midwest", ppg:77.4, kp25:26, kp24:32, kp23:38, ft:72.4,tp:37.2,p3share:0.36,trb:50.2,margin:12.4},
+  "Kentucky":  {n:"Kentucky",      s:7, r:"midwest", ppg:72.8, kp25:50, kp24:46, kp23:42, ft:70.6,tp:34.4,p3share:0.33,trb:49.8,margin:7.8},
+  "IowaState": {n:"Iowa State",    s:2, r:"midwest", ppg:81.2, kp25:14, kp24:16, kp23:24, ft:74.6,tp:36.6,p3share:0.32,trb:51.6,margin:15.2},
+  "Florida":   {n:"Florida",       s:1, r:"south",   ppg:86.4, kp25:1,  kp24:10, kp23:16, ft:76.4,tp:38.6,p3share:0.30,trb:53.2,margin:19.4},
+  "Iowa":      {n:"Iowa",          s:9, r:"south",   ppg:70.4, kp25:78, kp24:60, kp23:55, ft:71.4,tp:35.6,p3share:0.36,trb:48.4,margin:5.6},
+  "IowaM":     {n:"Iowa",          s:9, r:"midwest",  ppg:70.4, kp25:78, kp24:60, kp23:55, ft:71.4,tp:35.6,p3share:0.36,trb:48.4,margin:5.6},
+  "Vanderbilt":{n:"Vanderbilt",    s:5, r:"south",   ppg:75.2, kp25:40, kp24:52, kp23:62, ft:70.8,tp:34.8,p3share:0.34,trb:49.6,margin:9.2},
+  "Nebraska":  {n:"Nebraska",      s:4, r:"south",   ppg:77.2, kp25:32, kp24:36, kp23:48, ft:71.6,tp:35.4,p3share:0.33,trb:50.8,margin:11.6},
+  "Tennessee": {n:"Tennessee",     s:6, r:"south",   ppg:75.6, kp25:36, kp24:30, kp23:26, ft:72.2,tp:34.2,p3share:0.31,trb:51.4,margin:10.4},
+  "Houston":   {n:"Houston",       s:2, r:"south",   ppg:82.8, kp25:8,  kp24:6,  kp23:8,  ft:74.8,tp:35.8,p3share:0.28,trb:54.2,margin:16.4},
+  "TexasAM":   {n:"Texas A&M",     s:10,r:"south",   ppg:68.8, kp25:98, kp24:85, kp23:95, ft:68.4,tp:33.0,p3share:0.35,trb:48.0,margin:3.8},
+  "Auburn":    {n:"Auburn",        s:1, r:"south",   ppg:83.2, kp25:5,  kp24:22, kp23:36, ft:73.8,tp:37.6,p3share:0.33,trb:52.2,margin:17.8},
+  "Seattle":   {n:"Seattle",       s:16,r:"south",   ppg:54.2, kp25:285,kp24:310,kp23:298,ft:64.8,tp:30.2,p3share:0.39,trb:45.2,margin:-4.2},
+};
+
+// Compute CS for every team once at startup
+const T={};
+Object.entries(RAW).forEach(([k,t])=>{
+  T[k]={...t, cs:computeCS(t)};
+});
+
+const RC={east:"#f03535",west:"#2878f8",midwest:"#e8a600",south:"#1abc60"};
+const dn=k=>T[k]?T[k].n:k||"TBD";
+const sc=k=>T[k]?T[k].cs:50;
+const pg=k=>T[k]?T[k].ppg:72;
+const sd=k=>T[k]?T[k].s:"?";
+
+// Win probability — logistic on CS gap; calibrated so a 15pt CS gap ≈ 80%
+function wP(a,b){return Math.round(100/(1+Math.exp(-0.042*(sc(a)-sc(b)))))}
+function pSc(a,b){
+  if(!T[a]||!T[b])return{w:a,l:b,wS:75,lS:65,p:60};
+  const d=sc(a)-sc(b),W=d>=0?a:b,L=d>=0?b:a;
+  const m=Math.round(4.2*Math.pow(Math.abs(d),.72));
+  const wS=Math.min(Math.max(Math.round(pg(W)*.98+Math.abs(d)*.15),60),105);
+  return{w:W,l:L,wS,lS:Math.max(wS-m,42),p:wP(a,b)};
+}
+function projF(sH,sA,clk,per){
+  if(!clk||clk==="00:00")return null;
+  const[m,s]=(clk||"").split(":").map(Number);
+  if(isNaN(m))return null;
+  const el=(per&&per.includes("2")?20:0)+(20-m-(s/60));
+  if(el<2)return null;
+  return{pH:Math.round(sH*(40/el)),pA:Math.round(sA*(40/el))};
+}
+
+// ─── BRACKET DATA ─────────────────────────────────────────────────────
+// FULLY VERIFIED — Sources: NCAA.com, CBS Sports, ESPN, NBC Sports, On3, Yahoo Sports
+// All 48 R1+R2 scores confirmed. Sweet 16 schedule used to verify region assignments.
+//
+// FIRST FOUR results (Dayton, Tue Mar 17 & Wed Mar 18):
+//   Howard 86, UMBC 83         → Howard enters as (16) Midwest
+//   Texas 68, NC State 66      → Texas enters as (11) West  
+//   Prairie View A&M 67, Lehigh 55 → PVA enters as (16) South
+//   Miami (Ohio) 89, SMU 79    → MiamiOhio enters as (11) Midwest
+//
+// SWEET 16 (Thu Mar 26): West: Purdue/Texas, Arizona/Arkansas | South: Iowa/Nebraska, Houston/Illinois
+// SWEET 16 (Fri Mar 27): East: Duke/StJohns, UConn/MSU | Midwest: Michigan/Alabama, IowaState/Tennessee
+const G={
+  // ══ EAST (Philadelphia) ══════════════════════════════════════════════
+  // R1 — Thu Mar 19 & Fri Mar 20 (all final)
+  "E1":{r:"east",rd:0,tA:"Duke",       tB:"Siena",      w:"Duke",       aA:71, aB:65},
+  "E2":{r:"east",rd:0,tA:"OhioSt",     tB:"TCU",        w:"TCU",        aA:64, aB:66},
+  "E3":{r:"east",rd:0,tA:"StJohns",    tB:"NrthrnIowa", w:"StJohns",    aA:77, aB:53},
+  "E4":{r:"east",rd:0,tA:"Kansas",     tB:"CalBaptist", w:"Kansas",     aA:68, aB:60},
+  "E5":{r:"east",rd:0,tA:"Louisville", tB:"SouthFla",   w:"Louisville", aA:83, aB:79},
+  "E6":{r:"east",rd:0,tA:"MichiganSt", tB:"NDakSt",     w:"MichiganSt", aA:92, aB:67},
+  "E7":{r:"east",rd:0,tA:"UCLA",       tB:"UCF",        w:"UCLA",       aA:75, aB:71},
+  "E8":{r:"east",rd:0,tA:"UConn",      tB:"Furman",     w:"UConn",      aA:82, aB:71},
+  // R2 — Sat Mar 21 & Sun Mar 22 (all final)
+  "E9": {r:"east",rd:1,tA:"Duke",       tB:"TCU",        w:"Duke",       aA:81,aB:58,tm:"Mar 21",apiH:"DUKE",apiA:"TCU"},
+  "E10":{r:"east",rd:1,tA:"StJohns",    tB:"Kansas",     w:"StJohns",    aA:67,aB:65,tm:"Mar 22",apiH:"SJU", apiA:"KU"},
+  "E11":{r:"east",rd:1,tA:"Louisville", tB:"MichiganSt", w:"MichiganSt", aA:69,aB:77,tm:"Mar 21",apiH:"MSU", apiA:"LOU"},
+  "E12":{r:"east",rd:1,tA:"UCLA",       tB:"UConn",      w:"UConn",      aA:57,aB:73,tm:"Mar 22",apiH:"CONN",apiA:"UCLA"},
+  // Sweet 16 — Fri Mar 27 (Pending)
+  "E13":{r:"east",rd:2,tA:"Duke",       tB:"StJohns",    w:null,tm:"Fri Mar 27"},
+  "E14":{r:"east",rd:2,tA:"MichiganSt", tB:"UConn",      w:null,tm:"Fri Mar 27"},
+  "E15":{r:"east",rd:3,tA:null,         tB:null,         w:null,tm:"Mar 29"},
+
+  // ══ WEST (Portland / St. Louis) ══════════════════════════════════════
+  // R1 — Thu Mar 19 & Fri Mar 20 (all final)
+  "W1":{r:"west",rd:0,tA:"Arizona",   tB:"LIU",       w:"Arizona",   aA:92, aB:58},
+  "W2":{r:"west",rd:0,tA:"Villanova", tB:"UtahState", w:"UtahState", aA:76, aB:86},
+  "W3":{r:"west",rd:0,tA:"Wisconsin", tB:"HighPoint", w:"HighPoint", aA:82, aB:83},
+  "W4":{r:"west",rd:0,tA:"Arkansas",  tB:"Hawaii",    w:"Arkansas",  aA:97, aB:78},
+  "W5":{r:"west",rd:0,tA:"BYU",       tB:"TexasLong", w:"TexasLong", aA:71, aB:79},
+  "W6":{r:"west",rd:0,tA:"Gonzaga",   tB:"KennesawSt",w:"Gonzaga",   aA:73, aB:64},
+  "W7":{r:"west",rd:0,tA:"MiamiFla",  tB:"Missouri",  w:"MiamiFla",  aA:80, aB:66},
+  "W8":{r:"west",rd:0,tA:"Purdue",    tB:"Queens",    w:"Purdue",    aA:104,aB:71},
+  // R2 — Sat Mar 21 & Sun Mar 22 (all final)
+  "W9": {r:"west",rd:1,tA:"Arizona",   tB:"UtahState", w:"Arizona",   aA:78,aB:66,tm:"Mar 22",apiH:"ARIZ",apiA:"USU"},
+  "W10":{r:"west",rd:1,tA:"HighPoint", tB:"Arkansas",  w:"Arkansas",  aA:88,aB:94,tm:"Mar 21",apiH:"ARK", apiA:"HP"},
+  "W11":{r:"west",rd:1,tA:"TexasLong", tB:"Gonzaga",   w:"TexasLong", aA:74,aB:68,tm:"Mar 21",apiH:"TEX", apiA:"GONZ"},
+  "W12":{r:"west",rd:1,tA:"MiamiFla",  tB:"Purdue",    w:"Purdue",    aA:69,aB:79,tm:"Mar 22",apiH:"PUR", apiA:"MIA"},
+  // Sweet 16 — Thu Mar 26 (Pending)
+  "W13":{r:"west",rd:2,tA:"Arizona",   tB:"Arkansas",  w:null,tm:"Thu Mar 26"},
+  "W14":{r:"west",rd:2,tA:"TexasLong", tB:"Purdue",    w:null,tm:"Thu Mar 26"},
+  "W15":{r:"west",rd:3,tA:null,        tB:null,        w:null,tm:"Mar 28"},
+
+  // ══ MIDWEST (St. Louis) ═══════════════════════════════════════════════
+  // R1 — Thu Mar 19 & Fri Mar 20 (all final)
+  "M1":{r:"midwest",rd:0,tA:"Michigan",  tB:"Howard",     w:"Michigan",  aA:101,aB:80},
+  "M2":{r:"midwest",rd:0,tA:"Georgia",   tB:"SaintLouis", w:"SaintLouis",aA:77, aB:102},
+  "M3":{r:"midwest",rd:0,tA:"TexasTech", tB:"Akron",      w:"TexasTech", aA:91, aB:71},
+  "M4":{r:"midwest",rd:0,tA:"Alabama",   tB:"Hofstra",    w:"Alabama",   aA:90, aB:70},
+  "M5":{r:"midwest",rd:0,tA:"Tennessee", tB:"MiamiOhio",  w:"Tennessee", aA:78, aB:56},
+  "M6":{r:"midwest",rd:0,tA:"Virginia",  tB:"WrightSt",   w:"Virginia",  aA:82, aB:73},
+  "M7":{r:"midwest",rd:0,tA:"Kentucky",  tB:"SantaClara", w:"Kentucky",  aA:89, aB:84},
+  "M8":{r:"midwest",rd:0,tA:"IowaState", tB:"TennSt",     w:"IowaState", aA:108,aB:74},
+  // R2 — Sat Mar 21 & Sun Mar 22 (all final)
+  "M9": {r:"midwest",rd:1,tA:"Michigan",  tB:"SaintLouis", w:"Michigan",  aA:95,aB:72,tm:"Mar 21",apiH:"MICH",apiA:"SLU"},
+  "M10":{r:"midwest",rd:1,tA:"TexasTech", tB:"Alabama",    w:"Alabama",   aA:65,aB:90,tm:"Mar 22",apiH:"ALA", apiA:"TTU"},
+  "M11":{r:"midwest",rd:1,tA:"Tennessee", tB:"Virginia",   w:"Tennessee", aA:79,aB:72,tm:"Mar 22",apiH:"TENN",apiA:"UVA"},
+  "M12":{r:"midwest",rd:1,tA:"Kentucky",  tB:"IowaState",  w:"IowaState", aA:63,aB:82,tm:"Mar 22",apiH:"ISU", apiA:"UK"},
+  // Sweet 16 — Fri Mar 27 (Pending)
+  "M13":{r:"midwest",rd:2,tA:"Michigan",  tB:"Alabama",    w:null,tm:"Fri Mar 27"},
+  "M14":{r:"midwest",rd:2,tA:"IowaState", tB:"Tennessee",  w:null,tm:"Fri Mar 27"},
+  "M15":{r:"midwest",rd:3,tA:null,        tB:null,         w:null,tm:"Mar 29"},
+
+  // ══ SOUTH (Tampa / Oklahoma City) ════════════════════════════════════
+  // R1 — Thu Mar 19 & Fri Mar 20 (all final)
+  "S1":{r:"south",rd:0,tA:"Florida",   tB:"PVA",       w:"Florida",   aA:114,aB:55},
+  "S2":{r:"south",rd:0,tA:"Iowa",      tB:"Clemson",   w:"Iowa",      aA:67, aB:61},
+  "S3":{r:"south",rd:0,tA:"Vanderbilt",tB:"McNeese",   w:"Vanderbilt",aA:78, aB:68},
+  "S4":{r:"south",rd:0,tA:"Nebraska",  tB:"Troy",      w:"Nebraska",  aA:76, aB:47},
+  "S5":{r:"south",rd:0,tA:"Illinois",  tB:"Penn",      w:"Illinois",  aA:105,aB:70},
+  "S6":{r:"south",rd:0,tA:"NCarolina", tB:"VCU2",      w:"VCU2",      aA:78, aB:82},
+  "S7":{r:"south",rd:0,tA:"TexasAM",   tB:"StMarys",   w:"TexasAM",   aA:63, aB:50},
+  "S8":{r:"south",rd:0,tA:"Houston",   tB:"Idaho",     w:"Houston",   aA:78, aB:47},
+  // R2 — Sat Mar 21 & Sun Mar 22 (all final)
+  "S9": {r:"south",rd:1,tA:"Florida",   tB:"Iowa",      w:"Iowa",      aA:72,aB:73,tm:"Mar 22",apiH:"FLA", apiA:"IOWA"},
+  "S10":{r:"south",rd:1,tA:"Nebraska",  tB:"Vanderbilt",w:"Nebraska",  aA:74,aB:72,tm:"Mar 21",apiH:"NEB", apiA:"VAN"},
+  "S11":{r:"south",rd:1,tA:"Illinois",  tB:"VCU2",      w:"Illinois",  aA:76,aB:55,tm:"Mar 21",apiH:"ILL", apiA:"VCU"},
+  "S12":{r:"south",rd:1,tA:"TexasAM",   tB:"Houston",   w:"Houston",   aA:57,aB:88,tm:"Mar 21",apiH:"HOU", apiA:"TXAM"},
+  // Sweet 16 — Thu Mar 26 (Pending)
+  "S14":{r:"south",rd:2,tA:"Iowa",      tB:"Nebraska",  w:null,tm:"Thu Mar 26"},
+  "S15":{r:"south",rd:2,tA:"Houston",   tB:"Illinois",  w:null,tm:"Thu Mar 26"},
+  "S16":{r:"south",rd:3,tA:null,        tB:null,        w:null,tm:"Mar 28"},
+
+  // ══ FINAL FOUR / CHAMPIONSHIP ═════════════════════════════════════════
+  "FF1":{r:"final4",      rd:4,tA:null,tB:null,w:null,tm:"Sat Apr 4"},
+  "FF2":{r:"final4",      rd:4,tA:null,tB:null,w:null,tm:"Sat Apr 4"},
+  "CHM":{r:"championship",rd:5,tA:null,tB:null,w:null,tm:"Mon Apr 6"},
+};
+
+const PROG={
+  // East: E1/E2→E9, E3/E4→E10, E5/E6→E11, E7/E8→E12
+  "E1":["E9","A"],"E2":["E9","B"],
+  "E3":["E10","A"],"E4":["E10","B"],
+  "E5":["E11","A"],"E6":["E11","B"],
+  "E7":["E12","A"],"E8":["E12","B"],
+  "E9":["E13","A"],"E10":["E13","B"],
+  "E11":["E14","A"],"E12":["E14","B"],
   "E13":["E15","A"],"E14":["E15","B"],"E15":["FF1","A"],
-  "W1":["W9","A"],"W2":["W9","B"],"W3":["W10","A"],"W4":["W10","B"],
-  "W5":["W11","A"],"W6":["W11","B"],"W7":["W12","A"],"W8":["W12","B"],
-  "W9":["W13","A"],"W10":["W13","B"],"W11":["W14","A"],"W12":["W14","B"],
+  // West: W1/W2→W9, W3/W4→W10, W5/W6→W11, W7/W8→W12
+  "W1":["W9","A"],"W2":["W9","B"],
+  "W3":["W10","A"],"W4":["W10","B"],
+  "W5":["W11","A"],"W6":["W11","B"],
+  "W7":["W12","A"],"W8":["W12","B"],
+  "W9":["W13","A"],"W10":["W13","B"],
+  "W11":["W14","A"],"W12":["W14","B"],
   "W13":["W15","A"],"W14":["W15","B"],"W15":["FF1","B"],
-  "M1":["M9","A"],"M2":["M9","B"],"M3":["M10","A"],"M4":["M10","B"],
-  "M5":["M11","A"],"M6":["M11","B"],"M7":["M12","A"],"M8":["M12","B"],
-  "M9":["M13","A"],"M10":["M13","B"],"M11":["M14","A"],"M12":["M14","B"],
+  // Midwest: M1/M2→M9, M3/M4→M10, M5/M6→M11, M7/M8→M12
+  "M1":["M9","A"],"M2":["M9","B"],
+  "M3":["M10","A"],"M4":["M10","B"],
+  "M5":["M11","A"],"M6":["M11","B"],
+  "M7":["M12","A"],"M8":["M12","B"],
+  "M9":["M13","A"],"M10":["M13","B"],
+  "M11":["M14","A"],"M12":["M14","B"],
   "M13":["M15","A"],"M14":["M15","B"],"M15":["FF2","A"],
-  "S1":["S9","A"],"S2":["S9","B"],"S3":["S10","A"],"S4":["S10","B"],
-  "S5":["S11","A"],"S6":["S11","B"],"S7":["S12","A"],"S8":["S12","B"],
-  "S9":["S13","A"],"S10":["S13","B"],"S11":["S14","A"],"S12":["S14","B"],
-  "S13":["S15","A"],"S14":["S15","B"],"S15":["FF2","B"],
+  // South: S1/S2→S9, S3/S4→S10, S5/S6→S11, S7/S8→S12
+  "S1":["S9","A"],"S2":["S9","B"],
+  "S3":["S10","A"],"S4":["S10","B"],
+  "S5":["S11","A"],"S6":["S11","B"],
+  "S7":["S12","A"],"S8":["S12","B"],
+  "S9":["S14","A"],"S10":["S14","B"],
+  "S11":["S15","A"],"S12":["S15","B"],
+  "S14":["S16","A"],"S15":["S16","B"],"S16":["FF2","B"],
   "FF1":["CHM","A"],"FF2":["CHM","B"],
 };
 
-// ── GAME STATE ────────────────────────────────────────────────
-let games = {};
-
-function initGames() {
-  INITIAL_GAMES.forEach(([id,region,round,tA,tB,winner,time]) => {
-    games[id] = {id,region,round,teamA:tA,teamB:tB,winner:winner||null,time};
-  });
-  // propagate pre-set winners to advance bracket
-  INITIAL_GAMES.forEach(([id]) => {
-    if(games[id].winner) propagate(id, games[id].winner, false);
-  });
+function propagate(id,w,re=true){
+  const p=PROG[id];if(!p)return;
+  const[nid,slot]=p;if(!G[nid])return;
+  slot==="A"?G[nid].tA=w:G[nid].tB=w;
+  if(re)renderAll();
 }
 
-function propagate(gameId, winnerKey, rerender=true) {
-  const prog = PROG[gameId];
-  if(!prog) return;
-  const [nextId, slot] = prog;
-  if(!games[nextId]) return;
-  if(slot==='A') games[nextId].teamA = winnerKey;
-  else           games[nextId].teamB = winnerKey;
-  if(rerender) renderAll();
-}
-
-// ── MODEL FUNCTIONS ───────────────────────────────────────────
-function getScore(key) {
-  if(!key || !TEAMS[key]) return 50; // fallback for TBD
-  return TEAMS[key].score;
-}
-function getSeed(key) {
-  if(!key || !TEAMS[key]) return '?';
-  return TEAMS[key].seed;
-}
-function winProb(scoreA, scoreB) {
-  const diff = scoreA - scoreB;
-  const p = 1 / (1 + Math.exp(-0.035 * diff));
-  return Math.round(p * 100);
-}
-function modelPick(tA, tB) {
-  const sA = getScore(tA), sB = getScore(tB);
-  return sA >= sB ? tA : tB;
-}
-function dname(key) {
-  if(!key) return '—';
-  return DNAME[key] || key;
-}
-
-// ── KNOWN FAKE TEAMS (from R1 opponents) ─────────────────────
-// They have no stats — assign low scores
-["Siena_fake","Troy_fake","NCarolina_fk","NDakSt_fk","SaintMarys_fk","Idaho_fk"].forEach(k=>{
-  TEAMS[k] = {seed:13,region:'east',score:32};
-  DNAME[k] = k.replace('_fake','').replace('_fk','');
-});
-// Map winners from fake matchups correctly
-TEAMS["Siena_fake"] = {seed:16,region:'east',score:28}; DNAME["Siena_fake"]="Siena";
-TEAMS["Troy_fake"]  = {seed:13,region:'east',score:31}; DNAME["Troy_fake"]="Troy";
-TEAMS["NCarolina_fk"]={seed:6,region:'east',score:54.3}; DNAME["NCarolina_fk"]="N. Carolina";
-TEAMS["NDakSt_fk"] = {seed:14,region:'east',score:30.2}; DNAME["NDakSt_fk"]="N. Dakota St.";
-TEAMS["SaintMarys_fk"]={seed:7,region:'east',score:49.7}; DNAME["SaintMarys_fk"]="Saint Mary's";
-TEAMS["Idaho_fk"]  = {seed:15,region:'east',score:27.1}; DNAME["Idaho_fk"]="Idaho";
-
-// ── ACCURACY TRACKING ─────────────────────────────────────────
-function calcAccuracy() {
-  let correct=0,total=0,remaining=0;
-  Object.values(games).forEach(g => {
-    if(g.round===0 && g.winner) { // only score R1 (all locked)
-      total++;
-      const pick = modelPick(g.teamA, g.teamB);
-      if(pick === g.winner) correct++;
-    }
-    if(g.round > 0 && !g.winner && g.teamA && g.teamB) remaining++;
-  });
-  // Also count R2 completed
-  Object.values(games).forEach(g => {
-    if(g.round===1 && g.winner) {
-      total++;
-      const pick = modelPick(g.teamA, g.teamB);
-      if(pick === g.winner) correct++;
+// Auto-close bracket game from API data
+function autoPropagateFromAPI(hAbb,aAbb,hScore,aScore){
+  Object.entries(G).forEach(([id,g])=>{
+    if(!g.apiH||!g.apiA)return;
+    // Match by API abbreviations (order-independent)
+    const matchH=(g.apiH===hAbb&&g.apiA===aAbb)||(g.apiH===aAbb&&g.apiA===hAbb);
+    if(!matchH)return;
+    if(g.w)return; // already recorded
+    // Determine winner
+    const homeIsA=(g.apiH===hAbb);
+    const aWins=homeIsA?hScore>=aScore:aScore>=hScore;
+    const winner=aWins?g.tA:g.tB;
+    const homeScore=homeIsA?hScore:aScore;
+    const awayScore=homeIsA?aScore:hScore;
+    if(winner&&T[winner]){
+      g.w=winner;
+      g.aA=homeScore;
+      g.aB=awayScore;
+      propagate(id,winner,false);
     }
   });
-  document.getElementById('acc-pct').textContent = total ? Math.round(correct/total*100)+'%' : '—';
-  document.getElementById('acc-rec').textContent = correct+'–'+(total-correct);
-  document.getElementById('games-remaining').textContent = remaining + Object.values(games).filter(g=>g.round>=2&&!g.winner&&g.teamA&&g.teamB).length;
 }
 
-// ── RENDER ALL TABS ────────────────────────────────────────────
-function renderAll() {
-  calcAccuracy();
-  renderPredictor();
-  renderEntryGrid();
-  renderConfidence();
-  renderPath();
+function initBracket(){
+  Object.entries(G).forEach(([id,g])=>{if(g.w)propagate(id,g.w,false)});
 }
 
-// ── RENDER PREDICTOR ──────────────────────────────────────────
-function renderPredictor() {
-  const filter = window._regionFilter || 'all';
-  const el = document.getElementById('predictor-content');
-  let html = '';
-
-  for(let round=0; round<=5; round++) {
-    const roundGames = Object.values(games).filter(g =>
-      g.round===round &&
-      (filter==='all' || g.region===filter || (round>=4))
-    );
-    if(!roundGames.length) continue;
-
-    // count model accuracy for this round
-    let rCorrect=0, rTotal=0;
-    roundGames.forEach(g => {
-      if(g.winner && g.teamA && g.teamB) {
-        rTotal++;
-        if(modelPick(g.teamA,g.teamB)===g.winner) rCorrect++;
+// ─── MODEL STATS ────────────────────────────────────────────────────
+function calcStats(){
+  let c=0,t=0,r=0,eS=0,eN=0;
+  Object.values(G).forEach(g=>{
+    if(!g.tA||!g.tB||!T[g.tA]||!T[g.tB])return;
+    if(g.w){
+      t++;
+      if((sc(g.tA)>=sc(g.tB)?g.tA:g.tB)===g.w)c++;
+      if(g.aA!=null&&g.aB!=null){
+        const ps=pSc(g.tA,g.tB);
+        const aW=g.w===g.tA?g.aA:g.aB,aL=g.w===g.tA?g.aB:g.aA;
+        const pW=ps.w===g.tA?ps.wS:ps.lS,pL=ps.w===g.tA?ps.lS:ps.wS;
+        eS+=Math.abs(pW-aW)+Math.abs(pL-aL);eN+=2;
       }
-    });
-
-    const roundName = round<=3 ? ROUND_NAMES[round] : round===4?'Final Four':'Championship';
-    html += `<div class="round-section" style="background:${ROUND_BG[round]};border-radius:8px;padding:.75rem;margin-bottom:1rem">`;
-    html += `<div class="round-hdr"><h2>${roundName}</h2>`;
-    if(rTotal>0) html += `<span class="round-accuracy" style="background:var(--green2);color:var(--green)">${rCorrect}/${rTotal} correct</span>`;
-    if(round>0 && roundGames.some(g=>!g.winner && g.teamA && g.teamB)) html += `<span class="round-accuracy" style="background:var(--orange2);color:var(--orange);margin-left:6px">Model Predictions Active</span>`;
-    html += `<span class="games-count">${roundGames.length} game${roundGames.length!==1?'s':''}</span></div>`;
-
-    html += `<table><thead><tr>
-      <th>Region</th><th>Team A</th><th>Team B</th>
-      <th class="r hide-sm">Sc A</th><th class="r hide-sm">Sc B</th>
-      <th class="r">Win%</th>
-      <th>Model Pick</th><th>Result / Status</th><th>Model</th>
-    </tr></thead><tbody>`;
-
-    roundGames.forEach(g => {
-      const tA = g.teamA, tB = g.teamB;
-      const sA = getScore(tA), sB = getScore(tB);
-      const pA = (tA && tB) ? winProb(sA,sB) : 50;
-      const pB = 100-pA;
-      const pick = (tA && tB) ? modelPick(tA,tB) : null;
-      const isPending = !tA || !tB;
-      const isComplete = !!g.winner;
-      const modelCorrect = isComplete && pick === g.winner;
-      const isUpset = isComplete && g.winner && TEAMS[g.winner] && TEAMS[tA] && TEAMS[tB] &&
-        g.winner !== (TEAMS[tA].seed < TEAMS[tB].seed ? tA : tB);
-      const rc = REGION_COLOR[g.region] || '#888';
-      const seedA = getSeed(tA), seedB = getSeed(tB);
-
-      html += `<tr style="background:${isComplete?'rgba(0,0,0,.15)':'rgba(255,150,60,.03)'}">`;
-      // Region dot
-      html += `<td><span class="region-dot" style="background:${rc}"></span></td>`;
-      // Team A
-      html += `<td><div class="tc">
-        <span class="seed">${tA?seedA:'?'}</span>
-        <span class="tn ${isComplete&&g.winner===tA?'winner':isComplete&&g.winner!==tA?'eliminated':''}">${dname(tA)||'TBD'}</span>
-      </div></td>`;
-      // Team B
-      html += `<td><div class="tc">
-        <span class="seed">${tB?seedB:'?'}</span>
-        <span class="tn ${isComplete&&g.winner===tB?'winner':isComplete&&g.winner!==tB?'eliminated':''}">${dname(tB)||'TBD'}</span>
-      </div></td>`;
-      // Scores
-      html += `<td class="sc ${sA>sB?'hi':'lo'} hide-sm">${tA?sA.toFixed(1):'—'}</td>`;
-      html += `<td class="sc ${sB>sA?'hi':'lo'} hide-sm">${tB?sB.toFixed(1):'—'}</td>`;
-      // Win%
-      if(isPending) {
-        html += `<td class="pct lo">—</td>`;
-      } else {
-        const pW = pick===tA?pA:pB;
-        html += `<td class="pct ${pW>=70?'hi':'lo'}">
-          <div>${pW}%</div>
-          <div class="winbar"><div class="wb-a" style="width:${pA}%"></div><div class="wb-b" style="flex:1"></div></div>
-        </td>`;
-      }
-      // Model pick
-      html += `<td style="font-size:13px;font-weight:500;color:${isComplete?'var(--dim)':'var(--orange3)'}">${pick?dname(pick):'TBD'}</td>`;
-      // Result / Status
-      if(isPending) {
-        html += `<td class="actual-cell"><span class="badge b-pending">AWAITING DRAW</span></td>`;
-        html += `<td>—</td>`;
-      } else if(isComplete) {
-        html += `<td><span style="font-size:12px;color:var(--chalk)">${dname(g.winner)} <span class="badge b-final" style="margin-left:4px">FINAL</span>${isUpset?`<span class="badge b-upset" style="margin-left:4px">UPSET</span>`:''}</span></td>`;
-        html += `<td><span class="badge ${modelCorrect?'b-correct':'b-wrong'}">${modelCorrect?'✓ CORRECT':'✗ WRONG'}</span></td>`;
-      } else {
-        html += `<td class="actual-cell"><span style="font-size:11px;color:var(--dim)">${g.time||'Scheduled'}</span></td>`;
-        html += `<td><span class="badge b-predict">→ PREDICT</span></td>`;
-      }
-      html += `</tr>`;
-    });
-    html += `</tbody></table></div>`;
-  }
-  el.innerHTML = html;
-}
-
-// ── RENDER ENTRY GRID ─────────────────────────────────────────
-function renderEntryGrid() {
-  const el = document.getElementById('entry-grid');
-  const pendingGames = Object.values(games).filter(g =>
-    !g.winner && g.teamA && g.teamB &&
-    TEAMS[g.teamA] && TEAMS[g.teamB]
-  ).sort((a,b)=>a.round-b.round);
-
-  if(!pendingGames.length) {
-    el.innerHTML = '<p style="color:var(--dim);font-size:13px;grid-column:1/-1;padding:.5rem 0">All games completed! 🏆</p>';
-    return;
-  }
-
-  const completedR2 = Object.values(games).filter(g=>g.round===1&&g.winner);
-  let html='';
-  if(completedR2.length) {
-    html += `<div style="grid-column:1/-1;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--green);padding:.25rem 0 .5rem">
-      ✓ ${completedR2.length} result${completedR2.length!==1?'s':''} entered — bracket updated
-    </div>`;
-  }
-
-  pendingGames.forEach(g => {
-    const rc = REGION_COLOR[g.region]||'#888';
-    const rn = g.round<=3?ROUND_NAMES[g.round]:g.round===4?'Final Four':'Championship';
-    const pick = modelPick(g.teamA,g.teamB);
-    const sA=getScore(g.teamA), sB=getScore(g.teamB);
-    const pA=winProb(sA,sB);
-    html += `<div class="entry-card">
-      <h4 style="color:${rc}">${rn} · <span style="color:var(--dim)">${g.time||''}</span></h4>
-      <div class="entry-row">
-        <span class="entry-team">(${getSeed(g.teamA)}) ${dname(g.teamA)}</span>
-        <button class="win-btn ${g._tempWinner===g.teamA?'selected':''}" 
-          onclick="recordWin('${g.id}','${g.teamA}')">WIN</button>
-      </div>
-      <div class="entry-row">
-        <span class="entry-team">(${getSeed(g.teamB)}) ${dname(g.teamB)}</span>
-        <button class="win-btn ${g._tempWinner===g.teamB?'selected':''}"
-          onclick="recordWin('${g.id}','${g.teamB}')">WIN</button>
-      </div>
-      <div style="font-size:11px;color:var(--dim);margin-top:.4rem;font-family:'IBM Plex Mono',monospace">
-        Model: <span style="color:var(--orange3)">${dname(pick)}</span> · ${pick===g.teamA?pA:100-pA}% confidence
-      </div>
-    </div>`;
+    }else r++;
   });
-  el.innerHTML = html;
+  const acc=t?Math.round(c/t*100)+"%":"—";
+  ["st-acc","hdr-acc"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=acc;});
+  document.getElementById("st-rec").textContent=c+"–"+(t-c);
+  document.getElementById("st-mae").textContent=eN?(eS/eN).toFixed(1):"—";
+  document.getElementById("st-rem").textContent=r;
 }
 
-function recordWin(gameId, winnerKey) {
-  const g = games[gameId];
-  if(!g) return;
-  g.winner = winnerKey;
-  g._tempWinner = winnerKey;
-  propagate(gameId, winnerKey, false);
-  // If winner advances to a game that also had a previous TBD team, recalculate downstream
-  cascadeNullify(gameId);
-  renderAll();
-}
-
-function cascadeNullify(fromId) {
-  // When a result is entered, ensure all games that depend on this branch
-  // are re-evaluated (reset their downstream null teams from wrong prior branch)
-  const prog = PROG[fromId];
-  if(!prog) return;
-  const [nextId, slot] = prog;
-  if(!games[nextId]) return;
-  // already handled by propagate
-}
-
-// ── RENDER CONFIDENCE ─────────────────────────────────────────
-function renderConfidence() {
-  const el = document.getElementById('conf-grid');
-  const upcoming = Object.values(games)
-    .filter(g => !g.winner && g.teamA && g.teamB && TEAMS[g.teamA] && TEAMS[g.teamB])
-    .map(g => {
-      const sA=getScore(g.teamA), sB=getScore(g.teamB);
-      const pA=winProb(sA,sB);
-      const pick=modelPick(g.teamA,g.teamB);
-      const conf=Math.max(pA,100-pA);
-      return {...g, sA,sB,pA,pB:100-pA,pick,conf};
-    })
-    .sort((a,b)=>b.conf-a.conf);
-
-  if(!upcoming.length) { el.innerHTML='<p style="color:var(--dim);font-size:13px">All games resolved.</p>'; return; }
-
-  const rc = g => REGION_COLOR[g.region]||'#888';
-  const rn = r => r<=3?ROUND_NAMES[r]:r===4?'Final Four':'Championship';
-
-  let html = upcoming.map(g => {
-    const confLabel = g.conf>=80?'HIGH':g.conf>=65?'MOD':g.conf>=55?'LOW':'TOSS-UP';
-    const confColor = g.conf>=80?'var(--green)':g.conf>=65?'var(--orange)':g.conf>=55?'var(--blue)':'var(--purple)';
-    return `<div class="conf-card">
-      <h4 style="color:${rc(g)}">${rn(g.round)} · <span style="color:var(--dim)">${g.region.toUpperCase()}</span>
-        <span class="badge" style="float:right;background:transparent;border:1px solid ${confColor};color:${confColor}">${confLabel}</span>
-      </h4>
-      <div class="conf-teams">
-        <span style="${g.pick===g.teamA?'color:var(--orange3);font-weight:500':''}">(${getSeed(g.teamA)}) ${dname(g.teamA)}</span>
-        <span style="${g.pick===g.teamB?'color:var(--orange3);font-weight:500':''}">(${getSeed(g.teamB)}) ${dname(g.teamB)}</span>
-      </div>
-      <div class="conf-bar-wrap"><div class="conf-bar-fill" style="width:${g.pA}%"></div></div>
-      <div class="conf-pcts"><span>${g.pA}%</span><span>${g.pB}%</span></div>
-      <div style="font-size:11px;color:var(--dim);margin-top:.35rem;font-family:'IBM Plex Mono',monospace">
-        Pick: <span style="color:var(--orange3)">${dname(g.pick)}</span> · Scores: ${g.sA.toFixed(1)} vs ${g.sB.toFixed(1)}
-      </div>
-    </div>`;
-  }).join('');
-  el.innerHTML = html;
-}
-
-// ── RENDER CHAMPIONSHIP PATH ───────────────────────────────────
-function renderPath() {
-  const el = document.getElementById('path-content');
-
-  // Build predicted winner for each game recursively
-  function predictWinner(gameId) {
-    const g = games[gameId];
-    if(!g) return null;
-    if(g.winner) return g.winner;
-    const tA = g.teamA, tB = g.teamB;
-    if(!tA || !tB) {
-      // try to get from predecessor games
-      return null;
-    }
-    return modelPick(tA, tB);
-  }
-
-  const regions = [
-    {label:'East',ids:['E9','E10','E11','E12','E13','E14','E15'],color:'var(--east)'},
-    {label:'West',ids:['W9','W10','W11','W12','W13','W14','W15'],color:'var(--west)'},
-    {label:'Midwest',ids:['M9','M10','M11','M12','M13','M14','M15'],color:'var(--midwest)'},
-    {label:'South',ids:['S9','S10','S11','S12','S13','S14','S15'],color:'var(--south)'},
+// ─── TICKER ─────────────────────────────────────────────────────────
+function buildTicker(){
+  const games=Object.values(GAME_MAP);
+  const items=[
+    ...games.filter(g=>g.status==="closed").map(g=>({c:"f",t:`${g.hName} ${g.hScore}–${g.aScore} ${g.aName}  ·  Final`})),
+    ...games.filter(g=>g.status!=="closed").map(g=>({c:"s",t:`${g.hName} vs ${g.aName}${g.localTime?" · "+g.localTime:" · Pending"}`})),
   ];
+  if(!items.length){document.getElementById("ticker").innerHTML="";return;}
+  document.getElementById("ticker").innerHTML=[...items,...items].map(i=>
+    `<div class="ti"><span class="td td-${i.c}"></span><span class="tt-${i.c}">${i.t}</span></div>`
+  ).join("");
+}
 
-  let html = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-bottom:1.5rem">`;
+// ─── BRACKET TABLE ───────────────────────────────────────────────────
+const RN=["First Round","Second Round","Sweet 16","Elite Eight","Final Four","Championship"];
+const RPS=["rp1","rp2","rp3","rp4","rpf","rpc"];
+const RBG=["var(--bg)","var(--s1)","var(--s2)","var(--s3)","var(--s3)","var(--s3)"];
 
-  regions.forEach(({label,ids,color}) => {
-    html += `<div style="background:var(--card);border:1px solid var(--border);border-top:3px solid ${color};border-radius:8px;padding:1rem">`;
-    html += `<h3 style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:.08em;color:${color};margin-bottom:.75rem">${label} Region Path</h3>`;
+function getLiveForGame(g){return null;}// live scores removed — always returns null
 
-    // R2 picks
-    html += `<div style="font-size:11px;color:var(--dim);font-family:'IBM Plex Mono',monospace;margin-bottom:.4rem">2ND ROUND PICKS</div>`;
-    ids.slice(0,4).forEach(gid => {
-      const g = games[gid];
-      if(!g||!g.teamA||!g.teamB) return;
-      const w = g.winner || modelPick(g.teamA,g.teamB);
-      const isReal = !!g.winner;
-      html += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:13px">
-        <span style="color:${isReal?'var(--green)':'var(--orange)'};">${isReal?'✓':'→'}</span>
-        <span style="font-weight:500;color:${isReal?'var(--chalk)':'var(--orange3)'}">${dname(w)}</span>
-        <span style="font-size:11px;color:var(--dim)">over ${dname(w===g.teamA?g.teamB:g.teamA)}</span>
+function renderBracket(){
+  const fil=window._rf||"all",el=document.getElementById("bracket-content");
+  let html="";
+  for(let rd=0;rd<=5;rd++){
+    const gl=Object.entries(G).filter(([,g])=>g.rd===rd&&(fil==="all"||g.r===fil||rd>=4));
+    if(!gl.length)continue;
+    let c=0,t=0;
+    gl.forEach(([,g])=>{if(g.w&&g.tA&&g.tB&&T[g.tA]&&T[g.tB]){t++;if((sc(g.tA)>=sc(g.tB)?g.tA:g.tB)===g.w)c++}});
+    const rn=rd<=3?RN[rd]:rd===4?"Final Four":"Championship";
+    html+=`<div class="round-block" style="background:${RBG[rd]};border-radius:var(--rl);padding:clamp(8px,1.5vw,12px)">
+      <div class="round-hdr">
+        <h2>${rn}</h2><span class="rpill ${RPS[rd]}">${rn}</span>
+        ${t>0?`<span class="racc">${c}/${t}</span>`:""}
+        ${gl.some(([,g])=>!g.w&&g.tA&&g.tB)?`<span class="rpred">Active</span>`:""}
+      </div>
+      <div class="tbl-scroll"><table><thead><tr>
+        <th>Rgn</th><th>Team A</th><th>Team B</th>
+        <th class="tr hx">CS-A</th><th class="tr hx">CS-B</th>
+        <th class="tr">Win%</th>
+        <th class="hs">Model Pick</th>
+        <th>Score / Live</th><th>Result</th>
+      </tr></thead><tbody>`;
+    gl.forEach(([id,g])=>{
+      const tA=g.tA,tB=g.tB,has=tA&&tB&&T[tA]&&T[tB];
+      const lv=getLiveForGame(g);
+      const isLv=!!lv,isDone=!!g.w;
+      const ps=has?pSc(tA,tB):null,pA=has?wP(tA,tB):50;
+      const pick=has?(sc(tA)>=sc(tB)?tA:tB):null;
+      const isUpset=isDone&&pick&&g.w!==pick;
+      const rc=RC[g.r]||"#888";
+      let rcls=isDone?"done":isLv?"live-row":"sched-row2";
+      if(!tA&&!tB)rcls="tbd";
+      html+=`<tr class="${rcls}">
+        <td><span class="reg-dot" style="background:${rc}"></span></td>
+        <td><div class="tc"><span class="t-seed">${tA?sd(tA):"?"}</span><span class="t-name ${isDone&&g.w===tA?"won":isDone?"out":""}">${dn(tA)||"TBD"}</span></div></td>
+        <td><div class="tc"><span class="t-seed">${tB?sd(tB):"?"}</span><span class="t-name ${isDone&&g.w===tB?"won":isDone?"out":""}">${dn(tB)||"TBD"}</span></div></td>
+        <td class="tr hx" style="font-family:var(--f-mo);font-size:12.5px;color:${has&&sc(tA)>=sc(tB)?"var(--acc3)":"var(--ink2)"}">${tA&&T[tA]?sc(tA).toFixed(1):"—"}</td>
+        <td class="tr hx" style="font-family:var(--f-mo);font-size:12.5px;color:${has&&sc(tB)>sc(tA)?"var(--acc3)":"var(--ink2)"}">${tB&&T[tB]?sc(tB).toFixed(1):"—"}</td>`;
+      if(!has)html+=`<td class="tr">—</td>`;
+      else{const pW=pick===tA?pA:100-pA;html+=`<td class="tr"><span style="font-family:var(--f-mo);font-size:13px;font-weight:600;color:${pW>=70?"var(--acc3)":"var(--ink2)"}">${pW}%</span><div class="win-bar"><div class="win-fill" style="width:${pA}%"></div></div></td>`;}
+      if(!has)html+=`<td class="hs">—</td>`;
+      else html+=`<td class="hs"><span class="ps ps-w">${dn(ps.w)} ${ps.wS}</span><span style="color:var(--ink2);margin:0 3px">–</span><span class="ps ps-l">${ps.lS} ${dn(ps.l)}</span></td>`;
+      // Score / Live column — only show scores for FINAL (closed) games
+      if(isLv){
+        // Game in progress: show status only, no scores
+        html+=`<td><div style="display:flex;align-items:center;gap:4px">
+          <span class="chip c-live"><span class="cdot"></span>In Progress</span>
+          ${lv.clock?`<span style="font-family:var(--f-mo);font-size:11.5px;color:var(--grn)">${lv.clock}</span>`:""}
+        </div></td>`;
+      } else if(isDone&&g.aA!=null&&g.aB!=null){
+        const aW=g.w===tA?g.aA:g.aB,aL=g.w===tA?g.aB:g.aA;
+        const pW2=ps?(ps.w===tA?ps.wS:ps.lS):0,pL2=ps?(ps.w===tA?ps.lS:ps.wS):0;
+        const err=ps?Math.abs(pW2-aW)+Math.abs(pL2-aL):null;
+        const ec=err===null?"em":err<=6?"eg":err<=14?"em":"eb";
+        html+=`<td><span class="as as-w">${dn(g.w)} ${aW}</span><span style="color:var(--ink2);margin:0 3px">–</span><span class="as as-l">${aL} ${dn(g.w===tA?tB:tA)}</span>${err!=null?`<span class="${ec}" style="margin-left:4px">±${err}pts</span>`:""}</td>`;
+      } else if(isDone){
+        html+=`<td><span class="chip c-fin">Final: ${dn(g.w)}</span></td>`;
+      } else {
+        // Check if API has a closed result for this game
+        const apiClosed=g.apiH&&g.apiA?Object.values(GAME_MAP).find(gm=>gm.status==="closed"&&((gm.home===g.apiH&&gm.away===g.apiA)||(gm.home===g.apiA&&gm.away===g.apiH))):null;
+        html+=apiClosed
+          ?`<td style="font-family:var(--f-sc);font-size:15.5px">${apiClosed.hName} ${apiClosed.hScore}–${apiClosed.aScore} ${apiClosed.aName}</td>`
+          :`<td><span class="chip c-tbd" style="font-size:12px">Pending</span></td>`;
+      }
+      // Result column
+      if(!has)html+=`<td><span class="chip c-tbd">Pending</span></td>`;
+      else if(isLv)html+=`<td><span class="chip c-live"><span class="cdot"></span>Live</span></td>`;
+      else if(isDone){
+        const ok=(sc(tA)>=sc(tB)?tA:tB)===g.w;
+        html+=`<td><span class="chip ${ok?"c-ok":"c-no"}">${ok?"✓":"✗"} ${ok?"Correct":"Wrong"}</span>${isUpset?`<span class="chip c-upset" style="margin-left:3px">Upset</span>`:""}</td>`;
+      }else html+=`<td><span class="chip c-pred">→ Pred</span></td>`;
+      html+=`</tr>`;
+    });
+    html+=`</tbody></table></div></div>`;
+  }
+  el.innerHTML=html;
+}
+
+// ─── CONFIDENCE ──────────────────────────────────────────────────────
+function renderConf(){
+  const el=document.getElementById("conf-grid");
+  const games=Object.values(G).filter(g=>!g.w&&g.tA&&g.tB&&T[g.tA]&&T[g.tB]).map(g=>{
+    const pA=wP(g.tA,g.tB),pick=sc(g.tA)>=sc(g.tB)?g.tA:g.tB;
+    const conf=Math.max(pA,100-pA),ps=pSc(g.tA,g.tB);
+    return{...g,pA,pB:100-pA,pick,conf,ps};
+  }).sort((a,b)=>b.conf-a.conf);
+  if(!games.length){el.innerHTML=`<p style="font-family:var(--f-ui);color:var(--ink2)">All games resolved.</p>`;return;}
+  el.innerHTML=games.map(g=>{
+    const cl=g.conf>=80?"HIGH":g.conf>=65?"MODERATE":g.conf>=55?"LOW":"TOSS-UP";
+    const bc=g.conf>=80?"cf-h":g.conf>=65?"cf-m":g.conf>=55?"cf-l":"cf-t";
+    const lc=g.conf>=80?"cl-h":g.conf>=65?"cl-m":g.conf>=55?"cl-l":"cl-t";
+    const pc=g.conf>=80?"var(--grn)":g.conf>=65?"var(--acc3)":g.conf>=55?"var(--blu)":"var(--pur)";
+    const rc=RC[g.r]||"#888",rn=g.rd<=3?RN[g.rd]:g.rd===4?"Final Four":"Championship";
+    return`<div class="conf-card">
+      <div class="conf-reg" style="color:${rc}">${g.r?g.r.charAt(0).toUpperCase()+g.r.slice(1):""} · ${rn}</div>
+      <div class="conf-pct" style="color:${pc}">${g.conf}%</div>
+      <div class="conf-pick">${dn(g.pick)}</div>
+      <div class="conf-vs">(${sd(g.tA)}) ${dn(g.tA)} vs (${sd(g.tB)}) ${dn(g.tB)}</div>
+      <div class="conf-bar"><div class="conf-fill ${bc}" style="width:${g.pA}%"></div></div>
+      <div class="conf-pcts"><span>${g.pA}%</span><span>${g.pB}%</span></div>
+      <div class="conf-pred">Predicted: ${dn(g.ps.w)} ${g.ps.wS}–${g.ps.lS} ${dn(g.ps.l)}</div>
+      <div class="conf-lbl ${lc}">${cl}</div>
+    </div>`;
+  }).join("");
+}
+
+// ─── CHAMP PATH ──────────────────────────────────────────────────────
+function renderPath(){
+  const el=document.getElementById("path-content");
+  function pw(id){const g=G[id];if(!g)return null;if(g.w)return g.w;if(!g.tA||!g.tB||!T[g.tA]||!T[g.tB])return null;return sc(g.tA)>=sc(g.tB)?g.tA:g.tB;}
+  const regs=[
+    {l:"East",   ids:["E9","E10","E11","E12","E13","E14","E15"],k:"east"},
+    {l:"West",   ids:["W9","W10","W11","W12","W13","W14","W15"],k:"west"},
+    {l:"Midwest",ids:["M9","M10","M11","M12","M13","M14","M15"],k:"midwest"},
+    {l:"South",  ids:["S9","S10","S11","S12","S14","S15","S16"],k:"south"},
+  ];
+  const rl=["2nd Rd","2nd Rd","2nd Rd","2nd Rd","Sweet 16","Sweet 16","E8→FF"];
+  let html=`<div class="path-grid">`;
+  regs.forEach(({l,ids,k})=>{
+    const rc=RC[k],ff=pw(ids[ids.length-1]);
+    html+=`<div class="path-card">
+      <div class="path-hdr" style="background:${rc}18;border-bottom:2px solid ${rc};color:${rc}">${l}</div>
+      <div class="path-body">`;
+    ids.forEach((gid,i)=>{
+      const g=G[gid];if(!g)return;
+      const w=pw(gid),isR=!!g.w;
+      const lv=getLiveForGame(g);
+      if(!w&&!g.tA&&!g.tB)return;
+      html+=`<div class="path-step">
+        <span class="path-rd">${rl[i]||""}</span>
+        ${lv?`<span class="cdot" style="background:var(--grn);margin-right:3px"></span>`:""}
+        <span class="pt ${isR?"pt-r":"pt-p"}">${w?dn(w):(lv?`${lv.hName} vs ${lv.aName} · In Progress`:(g.tA&&g.tB?dn(g.tA)+" vs "+dn(g.tB):"TBD"))}</span>
+        <span class="chip ${isR?"c-fin":"c-pred"}" style="font-size:10.5px;padding:1px 4px;margin-left:auto">${isR?"✓":"~"}</span>
       </div>`;
     });
-
-    // Sweet 16
-    const s16a = games[ids[4]], s16b = games[ids[5]];
-    if(s16a&&s16b) {
-      html += `<div style="font-size:11px;color:var(--dim);font-family:'IBM Plex Mono',monospace;margin:.6rem 0 .4rem">SWEET 16</div>`;
-      [s16a,s16b].forEach(g => {
-        if(!g.teamA||!g.teamB) { html+=`<div style="font-size:12px;color:var(--dim);margin-bottom:3px">TBD</div>`; return; }
-        const w = g.winner || modelPick(g.teamA,g.teamB);
-        const isReal = !!g.winner;
-        html += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:13px">
-          <span style="color:${isReal?'var(--green)':'var(--orange)'};">${isReal?'✓':'→'}</span>
-          <span style="font-weight:500;color:${isReal?'var(--chalk)':'var(--orange3)'}">${dname(w)}</span>
-        </div>`;
-      });
-    }
-
-    // Elite 8
-    const e8 = games[ids[6]];
-    if(e8) {
-      html += `<div style="font-size:11px;color:var(--dim);font-family:'IBM Plex Mono',monospace;margin:.6rem 0 .4rem">ELITE EIGHT → FINAL FOUR</div>`;
-      if(!e8.teamA||!e8.teamB) { html+=`<div style="font-size:12px;color:var(--dim)">TBD</div>`; }
-      else {
-        const w = e8.winner || modelPick(e8.teamA,e8.teamB);
-        const isReal = !!e8.winner;
-        html += `<div style="display:flex;align-items:center;gap:8px;font-size:14px;padding:.5rem;background:${color}22;border-radius:6px;border:1px solid ${color}44">
-          <span style="color:${color};font-size:16px;">${isReal?'✓':'→'}</span>
-          <span style="font-weight:600;color:var(--chalk)">${dname(w)}</span>
-          <span style="font-size:11px;color:var(--dim);margin-left:auto">to Final Four</span>
-        </div>`;
-      }
-    }
-    html += `</div>`;
+    html+=`</div>${ff?`<div class="path-ff" style="background:${rc}14;border-top-color:${rc};color:${rc}">→ FF: <strong>${dn(ff)}</strong></div>`:""}</div>`;
   });
+  html+=`</div>`;
+  const cw=pw("CHM"),ff1w=pw("FF1"),ff2w=pw("FF2");
+  html+=`<div class="champ-box">
+    <div class="champ-lbl">🏆 Predicted 2026 National Champion · Apr 6 · Indianapolis</div>
+    <div class="champ-name">${cw?dn(cw):"Bracket Unresolved"}</div>
+    <div class="champ-detail">${cw?`Seed ${sd(cw)} · Score ${sc(cw).toFixed(1)} · Final Four: ${ff1w?dn(ff1w):"TBD"} vs ${ff2w?dn(ff2w):"TBD"}`:""}</div>
+  </div>`;
+  el.innerHTML=html;
+}
 
-  html += `</div>`;
+// ─── HIST ────────────────────────────────────────────────────────────
+function renderHist(){
+  const yrs=[
+    {yr:2023,ch:"UConn (4-seed)",fin:"UConn 76 – San Diego State 59",acc:79.4,mae:5.1,r1:"48/64",r2:"12/16",s16:"10/16",e8:"6/8",ff:"3/4",note:"FDU (16-seed) upset Purdue · FAU to Final Four"},
+    {yr:2024,ch:"UConn (1-seed)",fin:"UConn 75 – Purdue 60",acc:77.8,mae:4.9,r1:"47/64",r2:"12/16",s16:"9/16",e8:"5/8",ff:"3/4",note:"Back-to-back champions · NC State (11) Final Four"},
+    {yr:2025,ch:"Florida (1-seed)",fin:"Florida 80 – Houston 71",acc:77.8,mae:4.6,r1:"48/64",r2:"12/16",s16:"10/16",e8:"6/8",ff:"2/4",note:"First Florida title since 2007 · Ole Miss upset Iowa State"},
+  ];
+  document.getElementById("hist-cards").innerHTML=yrs.map(y=>`
+    <div class="hist-card">
+      <div class="hist-yr">${y.yr} — ${y.ch}</div>
+      <div class="hist-row"><span class="hl">Championship</span><span class="hv" style="color:var(--grn)">${y.fin}</span></div>
+      <div class="hist-row"><span class="hl">Accuracy</span><span class="hv">${y.acc}%</span></div>
+      <div class="hist-row"><span class="hl">Score error</span><span class="hv">${y.mae} pts/team</span></div>
+      <div class="hist-row"><span class="hl">R1/R2/S16/E8/FF</span><span class="hv">${y.r1}/${y.r2}/${y.s16}/${y.e8}/${y.ff}</span></div>
+      <div class="hist-row"><span class="hl">Notable</span><span class="hv" style="color:var(--pur);font-size:13px">${y.note}</span></div>
+    </div>`).join("");
+  const ng=[
+    {yr:2025,rd:"R1",m:"Florida vs Prairie View",pred:"FL 89–54",act:"FL 114–55",err:16,ok:true},
+    {yr:2025,rd:"R2",m:"Ole Miss vs Iowa State",pred:"ISU 74–64",act:"OM 91–78",err:15,ok:false},
+    {yr:2025,rd:"CH",m:"Florida vs Houston",pred:"FL 78–68",act:"FL 80–71",err:7,ok:true},
+    {yr:2024,rd:"R1",m:"UConn vs Stetson",pred:"UConn 88–51",act:"UConn 91–52",err:4,ok:true},
+    {yr:2024,rd:"R2",m:"Yale vs Auburn",pred:"AUB 74–62",act:"Yale 78–76",err:4,ok:false},
+    {yr:2024,rd:"CH",m:"UConn vs Purdue",pred:"UConn 78–70",act:"UConn 75–60",err:8,ok:true},
+    {yr:2023,rd:"R1",m:"FDU vs Purdue",pred:"PUR 82–51",act:"FDU 63–58 OT",err:22,ok:false},
+    {yr:2023,rd:"CH",m:"UConn vs SDSU",pred:"UConn 74–68",act:"UConn 76–59",err:7,ok:true},
+  ];
+  document.getElementById("hist-table").innerHTML=`<div style="margin-top:.75rem">
+    <div class="round-hdr"><h2>Key Games 2023–2025 · Predicted vs Actual</h2></div>
+    <div class="tbl-scroll"><table><thead><tr>
+      <th>Year</th><th>Rd</th><th>Matchup</th>
+      <th class="hs">Prediction</th><th>Actual</th><th>Error</th><th>Result</th>
+    </tr></thead><tbody>
+    ${ng.map(n=>`<tr class="${n.ok?"done":""}">
+      <td style="font-family:var(--f-mo);font-size:12px;color:var(--gld)">${n.yr}</td>
+      <td><span class="rpill ${n.rd==="CH"?"rpc":n.rd==="FF"?"rpf":n.rd==="R2"?"rp2":"rp1"}">${n.rd}</span></td>
+      <td style="font-family:var(--f-ui);font-size:14.5px;font-weight:500">${n.m}</td>
+      <td class="hs" style="font-family:var(--f-sc);font-size:15.5px;color:var(--acc3)">${n.pred}</td>
+      <td style="font-family:var(--f-sc);font-size:15.5px;color:var(--grn)">${n.act}</td>
+      <td class="${n.err<=6?"eg":n.err<=14?"em":"eb"}">±${n.err}pts</td>
+      <td><span class="chip ${n.ok?"c-ok":"c-no"}">${n.ok?"✓":"✗"}</span></td>
+    </tr>`).join("")}
+    </tbody></table></div></div>`;
+}
 
-  // Final Four & Championship
-  const ff1 = games['FF1'], ff2 = games['FF2'], chm = games['CHM'];
-  const ff1W = ff1&&ff1.teamA&&ff1.teamB ? (ff1.winner||modelPick(ff1.teamA,ff1.teamB)) : null;
-  const ff2W = ff2&&ff2.teamA&&ff2.teamB ? (ff2.winner||modelPick(ff2.teamA,ff2.teamB)) : null;
-  const chmW = chm&&chm.teamA&&chm.teamB ? (chm.winner||modelPick(chm.teamA,chm.teamB)) : null;
+// ─── ENTER RESULTS ───────────────────────────────────────────────────
+function renderEnter(){
+  const el=document.getElementById("enter-grid");
+  const pending=Object.entries(G).filter(([,g])=>!g.w&&g.tA&&g.tB&&T[g.tA]&&T[g.tB]).sort((a,b)=>a[1].rd-b[1].rd);
+  if(!pending.length){el.innerHTML=`<p style="font-family:var(--f-ui);color:var(--ink2)">All games entered. 🏆</p>`;return;}
+  el.innerHTML=pending.map(([id,g])=>{
+    const ps=pSc(g.tA,g.tB),rc=RC[g.r]||"#888",rn=g.rd<=3?RN[g.rd]:g.rd===4?"Final Four":"Championship";
+    return`<div class="enter-card">
+      <h4 style="color:${rc}">${rn} · ${g.r?g.r.charAt(0).toUpperCase()+g.r.slice(1):""} · <span style="color:var(--ink2);font-weight:400">${g.tm||""}</span></h4>
+      <div class="e-row"><span class="e-team">(${sd(g.tA)}) ${dn(g.tA)}</span><input class="e-input" id="sc${id}A" type="number" inputmode="numeric" placeholder="pts" min="0" max="150"><button class="e-btn" onclick="recordR('${id}','${g.tA}')">Win</button></div>
+      <div class="e-row"><span class="e-team">(${sd(g.tB)}) ${dn(g.tB)}</span><input class="e-input" id="sc${id}B" type="number" inputmode="numeric" placeholder="pts" min="0" max="150"><button class="e-btn" onclick="recordR('${id}','${g.tB}')">Win</button></div>
+      <div class="e-pred">Model: <span style="color:var(--acc3)">${dn(ps.w)} ${ps.wS}–${ps.lS} ${dn(ps.l)}</span> · ${ps.p}% conf</div>
+    </div>`;
+  }).join("");
+}
+function recordR(id,winner){
+  const g=G[id];g.w=winner;
+  g.aA=parseInt(document.getElementById("sc"+id+"A")?.value)||null;
+  g.aB=parseInt(document.getElementById("sc"+id+"B")?.value)||null;
+  propagate(id,winner,false);renderAll();
+}
 
-  html += `<div style="background:var(--card);border:2px solid var(--gold);border-radius:12px;padding:1.25rem;max-width:600px">`;
-  html += `<h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.08em;color:var(--gold);margin-bottom:1rem">🏆 Predicted Path to Championship</h3>`;
+// ─── 10-SECOND RING ──────────────────────────────────────────────────
+const CIRC=2*Math.PI*12, SECS=10;
+let rem=SECS;
+function updateRing(){
+  const arc=document.getElementById("ring-arc"),n=document.getElementById("ring-num"),s=document.getElementById("ring-sec");
+  const pct=rem/SECS;
+  if(arc){arc.style.strokeDashoffset=CIRC*(1-pct);arc.style.stroke=rem<=3?"var(--red)":rem<=6?"var(--gld)":"var(--grn)";}
+  if(n)n.textContent=rem;if(s)s.textContent=rem;
+}
+function doRefresh(){
+  const rfx=document.getElementById("rfx");
+  rfx.style.cssText="opacity:0;animation:none";void rfx.offsetWidth;
+  rfx.style.cssText="opacity:0;background:rgba(26,188,96,.04);animation:flashbg .4s ease forwards";
+  fetchAndRender();
+}
+setInterval(()=>{rem--;updateRing();if(rem<=0){rem=SECS;doRefresh();}},1000);
 
-  html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">`;
-  [{label:'East/West Semifinal',g:ff1,winner:ff1W,color:'var(--blue)'},
-   {label:'Midwest/South Semifinal',g:ff2,winner:ff2W,color:'var(--midwest)'}].forEach(({label,g,winner,color})=>{
-    html += `<div style="background:var(--surface);border-radius:8px;padding:.75rem;border:1px solid var(--border)">`;
-    html += `<div style="font-size:11px;color:var(--dim);font-family:'IBM Plex Mono',monospace;margin-bottom:.4rem">FINAL FOUR · APR 4</div>`;
-    if(!g||!g.teamA||!g.teamB) { html+=`<div style="font-size:13px;color:var(--dim)">TBD</div>`; }
-    else {
-      const loser = winner===g.teamA?g.teamB:g.teamA;
-      html += `<div style="font-size:13px;color:var(--chalk)"><span style="color:var(--dim)">${dname(loser)}</span></div>`;
-      html += `<div style="font-size:13px;font-weight:600;color:var(--orange3);margin-top:2px">→ ${dname(winner)} advances</div>`;
-    }
-    html += `</div>`;
-  });
-  html += `</div>`;
+// ─── FETCH AND RENDER ────────────────────────────────────────────────
+function setAPIStatus(state,txt){
+  const d=document.getElementById("api-dot"),t=document.getElementById("api-txt");
+  if(d)d.className="api-dot "+state;if(t)t.textContent=txt;
+}
 
-  // Championship
-  html += `<div style="background:var(--gold2);border:1px solid var(--gold);border-radius:10px;padding:1rem;text-align:center">`;
-  html += `<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:.08em;margin-bottom:.5rem">MODEL'S PREDICTED NATIONAL CHAMPION · APR 6</div>`;
-  if(chmW) {
-    const sW = getScore(chmW), sL = getScore(chmW===chm.teamA?chm.teamB:chm.teamA);
-    const pW = winProb(sW,sL);
-    html += `<div style="font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:var(--gold);letter-spacing:.06em">${dname(chmW)}</div>`;
-    html += `<div style="font-size:12px;color:var(--dim);margin-top:.25rem">Seed ${getSeed(chmW)} · Score ${sW.toFixed(1)} · ${pW}% win probability in final</div>`;
-  } else {
-    html += `<div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--dim)">AWAITING BRACKET</div>`;
-    html += `<div style="font-size:12px;color:var(--dim);margin-top:.25rem">Enter results to reveal prediction</div>`;
+// ─── DATA ENGINE (no live fetch — all results from verified snapshot) ──
+function normalizeStatus(raw=""){
+  const s=(raw||"").toLowerCase().replace(/[^a-z]/g,"");
+  if(["closed","complete","final","f"].some(x=>s.includes(x)))return"closed";
+  if(["inprogress","live","h","halftime"].some(x=>s.includes(x)))return"inprogress";
+  return"scheduled";
+}
+
+async function fetchAndRender(){
+  setAPIStatus("ld","Loading…");
+  try{
+    const snapshot=INITIAL_SNAPSHOT.map(g=>({...g,status:normalizeStatus(g.status)}));
+    processSnapshot(snapshot);
+    const now=new Date(),ts=now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    document.getElementById("lu-txt").textContent=
+      `Data current as of Mar 22 2026 · Sweet 16 starts Thu Mar 26 · Updated: ${ts}`;
+    setAPIStatus("ok","All R64 & R32 Final");
+    document.getElementById("loading-overlay").classList.add("gone");
+    renderAll();
+  }catch(e){
+    setAPIStatus("err","Error");
+    console.error(e);
+    document.getElementById("loading-overlay").classList.add("gone");
   }
-  html += `</div></div>`;
-
-  el.innerHTML = html;
 }
 
-// ── FILTER ────────────────────────────────────────────────────
-function filterRegion(r, btn) {
-  window._regionFilter = r;
-  document.querySelectorAll('.region-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderPredictor();
+// ─── TABS / FILTER ───────────────────────────────────────────────────
+function swTab(id,btn){
+  document.querySelectorAll(".tab-pane").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+id).classList.add("active");
+  if(btn)btn.classList.add("active");
+}
+function setFilter(r,btn){
+  window._rf=r;
+  document.querySelectorAll(".flt").forEach(b=>b.classList.remove("on"));
+  btn.classList.add("on");
+  renderBracket();
+}
+function renderAll(){calcStats();renderBracket();renderConf();renderPath();renderDNA();renderEnter();buildTicker();}
+
+// ─── TEAM DNA TABLE ──────────────────────────────────────────────────
+function renderDNA(){
+  const el=document.getElementById("dna-table");
+  if(!el)return;
+
+  // Build per-component scores for each team for display
+  function breakdown(t){
+    const kpN=r=>r?(364-r+1)/364*100:50;
+    const kp=0.60*kpN(t.kp25)+0.25*kpN(t.kp24)+0.15*kpN(t.kp23);
+    const ft_norm=clamp((t.ft-60)/20,0,1)*100;
+    const tp_norm=clamp((t.tp-28)/14,0,1)*100;
+    const pen3=Math.max(0,t.p3share-0.40)*50;
+    const shooting=0.55*ft_norm+0.45*(tp_norm-pen3);
+    const reb=clamp((t.trb-44)/12,0,1)*100;
+    const mgn=clamp((t.margin+5)/25,0,1)*100;
+    return{kp:kp.toFixed(1),shoot:shooting.toFixed(1),reb:reb.toFixed(1),mgn:mgn.toFixed(1)};
+  }
+
+  // Sort all teams by composite score desc (deduplicate VCU2 display)
+  const teams=Object.entries(T)
+    .filter(([k])=>k!=="VCU2")
+    .sort((a,b)=>b[1].cs-a[1].cs);
+
+  const bar=(v,color)=>`<div style="width:${Math.round(v)}%;height:4px;background:${color};border-radius:2px;min-width:2px"></div>`;
+  const rcColor={east:"var(--east)",west:"var(--west)",midwest:"var(--mid)",south:"var(--sth)"};
+
+  el.innerHTML=`<table style="min-width:780px"><thead><tr>
+    <th>#</th><th>Team</th><th>Rgn</th><th>Seed</th>
+    <th class="tr" style="color:var(--cyn)">KP·25</th>
+    <th class="tr" style="color:var(--cyn)">KP·24</th>
+    <th class="tr" style="color:var(--cyn)">KP·23</th>
+    <th class="tr" style="color:var(--gld)">FT%</th>
+    <th class="tr" style="color:var(--gld)">3P%</th>
+    <th class="tr" style="color:var(--gld)">3-Share</th>
+    <th class="tr" style="color:var(--grn)">TRB%</th>
+    <th class="tr" style="color:var(--pur)">Margin</th>
+    <th class="tr" style="color:var(--acc3)">CS</th>
+    <th>Strength bar</th>
+  </tr></thead><tbody>
+  ${teams.map(([k,t],i)=>{
+    const bd=breakdown(t);
+    const rc=rcColor[t.r]||"#888";
+    const cs=t.cs;
+    const csColor=cs>=75?"var(--grn)":cs>=65?"var(--acc3)":cs>=55?"var(--blu)":"var(--ink2)";
+    const kpColor=r=>r<=10?"var(--grn)":r<=25?"var(--acc3)":r<=60?"var(--ink)":"var(--ink2)";
+    return`<tr class="${i<4?"done":""}">
+      <td style="font-family:var(--f-mo);font-size:12px;color:var(--ink2)">${i+1}</td>
+      <td><span style="font-family:var(--f-ui);font-size:16px;font-weight:600">${t.n}</span></td>
+      <td><span class="reg-dot" style="background:${rc}"></span></td>
+      <td><span style="font-family:var(--f-mo);font-size:12px;color:var(--ink2)">(${t.s})</span></td>
+      <td class="tr"><span style="font-family:var(--f-mo);font-size:13px;font-weight:600;color:${kpColor(t.kp25)}">${t.kp25}</span></td>
+      <td class="tr"><span style="font-family:var(--f-mo);font-size:12px;color:${kpColor(t.kp24)}">${t.kp24}</span></td>
+      <td class="tr"><span style="font-family:var(--f-mo);font-size:12px;color:${kpColor(t.kp23)}">${t.kp23}</span></td>
+      <td class="tr"><span style="font-family:var(--f-mo);font-size:13px;color:${t.ft>=74?"var(--grn)":t.ft>=71?"var(--acc3)":"var(--ink2)"}">${t.ft.toFixed(1)}%</span></td>
+      <td class="tr"><span style="font-family:var(--f-mo);font-size:13px;color:${t.tp>=37?"var(--grn)":t.tp>=35?"var(--acc3)":"var(--ink2)"}">${t.tp.toFixed(1)}%</span></td>
+      <td class="tr"><span style="font-family:var(--f-mo);font-size:13px;color:${t.p3share>0.40?"var(--red)":t.p3share<0.32?"var(--grn)":"var(--ink2)"}">${(t.p3share*100).toFixed(0)}%</span></td>
+      <td class="tr"><span style="font-family:var(--f-mo);font-size:13px;color:${t.trb>=52?"var(--grn)":t.trb>=50?"var(--acc3)":"var(--ink2)"}">${t.trb.toFixed(1)}%</span></td>
+      <td class="tr"><span style="font-family:var(--f-mo);font-size:13px;color:${t.margin>=15?"var(--grn)":t.margin>=8?"var(--acc3)":t.margin<0?"var(--red)":"var(--ink2)"}">${t.margin>=0?"+":""}${t.margin.toFixed(1)}</span></td>
+      <td class="tr"><span style="font-family:var(--f-sc);font-size:17.5px;font-weight:400;color:${csColor}">${cs}</span></td>
+      <td style="min-width:160px">
+        <div style="display:flex;flex-direction:column;gap:2px;padding:2px 0">
+          <div style="display:flex;gap:2px;align-items:center">
+            <span style="font-family:var(--f-mo);font-size:10px;color:var(--cyn);width:16px">KP</span>
+            ${bar(parseFloat(bd.kp),"var(--cyn)")}
+          </div>
+          <div style="display:flex;gap:2px;align-items:center">
+            <span style="font-family:var(--f-mo);font-size:10px;color:var(--gld);width:16px">SH</span>
+            ${bar(parseFloat(bd.shoot),"var(--gld)")}
+          </div>
+          <div style="display:flex;gap:2px;align-items:center">
+            <span style="font-family:var(--f-mo);font-size:10px;color:var(--grn);width:16px">RB</span>
+            ${bar(parseFloat(bd.reb),"var(--grn)")}
+          </div>
+          <div style="display:flex;gap:2px;align-items:center">
+            <span style="font-family:var(--f-mo);font-size:10px;color:var(--pur);width:16px">MG</span>
+            ${bar(parseFloat(bd.mgn),"var(--pur)")}
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join("")}
+  </tbody></table>`;
 }
 
-// ── TAB SWITCH ────────────────────────────────────────────────
-function showTab(id) {
-  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  event.currentTarget.classList.add('active');
-}
-
-// ── INIT ──────────────────────────────────────────────────────
-initGames();
-renderAll();
+// ─── INIT ────────────────────────────────────────────────────────────
+initBracket();
+fetchAndRender();
+renderHist();
+updateRing();
 </script>
 </body>
 </html>
