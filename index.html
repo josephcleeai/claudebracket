@@ -453,6 +453,22 @@ tr.done{background:var(--s1)}tr.live-row{animation:rowpulse 3s ease-in-out infin
 const INITIAL_SNAPSHOT = [
   // ══ ROUND OF 32 — Saturday Mar 21 ══════════════════════════════════
   {id:"cb6bf9",status:"closed",home:"MICH",away:"SLU", hScore:95,aScore:72},
+  // ══ SWEET 16 — Thursday Mar 26 ════════════════════════════════════
+  {id:"s16w1", status:"closed",home:"ARIZ",away:"ARK", hScore:109,aScore:88},
+  {id:"s16w2", status:"closed",home:"PUR", away:"TEX", hScore:79, aScore:77},
+  {id:"s16s1", status:"closed",home:"IOWA",away:"NEB", hScore:77, aScore:71},
+  {id:"s16s2", status:"closed",home:"ILL", away:"HOU", hScore:71, aScore:55},
+  // ══ SWEET 16 — Friday Mar 27 ══════════════════════════════════════
+  {id:"s16e1", status:"closed",home:"DUKE",away:"SJU", hScore:80, aScore:75},
+  {id:"s16e2", status:"closed",home:"CONN",away:"MSU", hScore:67, aScore:63},
+  {id:"s16m1", status:"closed",home:"MICH",away:"ALA", hScore:90, aScore:77},
+  {id:"s16m2", status:"closed",home:"TENN",away:"ISU", hScore:76, aScore:62},
+  // ══ ELITE 8 — Saturday Mar 28 ════════════════════════════════════
+  {id:"e8w1",  status:"closed",home:"ARIZ",away:"PUR", hScore:79, aScore:64},
+  {id:"e8s1",  status:"closed",home:"ILL", away:"IOWA",hScore:71, aScore:59},
+  // ══ ELITE 8 — Sunday Mar 29 ══════════════════════════════════════
+  {id:"e8m1",  status:"closed",home:"MICH",away:"TENN",hScore:95, aScore:62},
+  {id:"e8e1",  status:"closed",home:"CONN",away:"DUKE",hScore:73, aScore:72},
   {id:"6f4056",status:"closed",home:"DUKE",away:"TCU", hScore:81,aScore:58},
   {id:"afa041",status:"closed",home:"MSU", away:"LOU", hScore:77,aScore:69},
   {id:"4d47bd",status:"closed",home:"TEX", away:"GONZ",hScore:74,aScore:68},
@@ -712,10 +728,11 @@ const G={
   "E10":{r:"east",rd:1,tA:"StJohns",    tB:"Kansas",     w:"StJohns",    aA:67,aB:65,tm:"Mar 22",apiH:"SJU", apiA:"KU"},
   "E11":{r:"east",rd:1,tA:"Louisville", tB:"MichiganSt", w:"MichiganSt", aA:69,aB:77,tm:"Mar 21",apiH:"MSU", apiA:"LOU"},
   "E12":{r:"east",rd:1,tA:"UCLA",       tB:"UConn",      w:"UConn",      aA:57,aB:73,tm:"Mar 22",apiH:"CONN",apiA:"UCLA"},
-  // Sweet 16 — Fri Mar 27 (Pending)
-  "E13":{r:"east",rd:2,tA:"Duke",       tB:"StJohns",    w:null,tm:"Fri Mar 27"},
-  "E14":{r:"east",rd:2,tA:"MichiganSt", tB:"UConn",      w:null,tm:"Fri Mar 27"},
-  "E15":{r:"east",rd:3,tA:null,         tB:null,         w:null,tm:"Mar 29"},
+  // Sweet 16 — Fri Mar 27 (Final)
+  "E13":{r:"east",rd:2,tA:"Duke",       tB:"StJohns",    w:"Duke",       aA:80,aB:75,tm:"Fri Mar 27"},
+  "E14":{r:"east",rd:2,tA:"MichiganSt", tB:"UConn",      w:"UConn",      aA:63,aB:67,tm:"Fri Mar 27"},
+  // Elite 8 — Sun Mar 29 (Final)
+  "E15":{r:"east",rd:3,tA:"Duke",       tB:"UConn",      w:"UConn",      aA:72,aB:73,tm:"Mar 29"},
 
   // ══ WEST (Portland / St. Louis) ══════════════════════════════════════
   // R1 — Thu Mar 19 & Fri Mar 20 (all final)
@@ -732,10 +749,11 @@ const G={
   "W10":{r:"west",rd:1,tA:"HighPoint", tB:"Arkansas",  w:"Arkansas",  aA:88,aB:94,tm:"Mar 21",apiH:"ARK", apiA:"HP"},
   "W11":{r:"west",rd:1,tA:"TexasLong", tB:"Gonzaga",   w:"TexasLong", aA:74,aB:68,tm:"Mar 21",apiH:"TEX", apiA:"GONZ"},
   "W12":{r:"west",rd:1,tA:"MiamiFla",  tB:"Purdue",    w:"Purdue",    aA:69,aB:79,tm:"Mar 22",apiH:"PUR", apiA:"MIA"},
-  // Sweet 16 — Thu Mar 26 (Pending)
-  "W13":{r:"west",rd:2,tA:"Arizona",   tB:"Arkansas",  w:null,tm:"Thu Mar 26"},
-  "W14":{r:"west",rd:2,tA:"TexasLong", tB:"Purdue",    w:null,tm:"Thu Mar 26"},
-  "W15":{r:"west",rd:3,tA:null,        tB:null,        w:null,tm:"Mar 28"},
+  // Sweet 16 — Thu Mar 26 (Final)
+  "W13":{r:"west",rd:2,tA:"Arizona",   tB:"Arkansas",  w:"Arizona",   aA:109,aB:88,tm:"Thu Mar 26"},
+  "W14":{r:"west",rd:2,tA:"TexasLong", tB:"Purdue",    w:"Purdue",    aA:77,aB:79,tm:"Thu Mar 26"},
+  // Elite 8 — Sat Mar 28 (Final)
+  "W15":{r:"west",rd:3,tA:"Arizona",   tB:"Purdue",    w:"Arizona",   aA:79,aB:64,tm:"Mar 28"},
 
   // ══ MIDWEST (St. Louis) ═══════════════════════════════════════════════
   // R1 — Thu Mar 19 & Fri Mar 20 (all final)
@@ -752,10 +770,11 @@ const G={
   "M10":{r:"midwest",rd:1,tA:"TexasTech", tB:"Alabama",    w:"Alabama",   aA:65,aB:90,tm:"Mar 22",apiH:"ALA", apiA:"TTU"},
   "M11":{r:"midwest",rd:1,tA:"Tennessee", tB:"Virginia",   w:"Tennessee", aA:79,aB:72,tm:"Mar 22",apiH:"TENN",apiA:"UVA"},
   "M12":{r:"midwest",rd:1,tA:"Kentucky",  tB:"IowaState",  w:"IowaState", aA:63,aB:82,tm:"Mar 22",apiH:"ISU", apiA:"UK"},
-  // Sweet 16 — Fri Mar 27 (Pending)
-  "M13":{r:"midwest",rd:2,tA:"Michigan",  tB:"Alabama",    w:null,tm:"Fri Mar 27"},
-  "M14":{r:"midwest",rd:2,tA:"IowaState", tB:"Tennessee",  w:null,tm:"Fri Mar 27"},
-  "M15":{r:"midwest",rd:3,tA:null,        tB:null,         w:null,tm:"Mar 29"},
+  // Sweet 16 — Fri Mar 27 (Final)
+  "M13":{r:"midwest",rd:2,tA:"Michigan",  tB:"Alabama",    w:"Michigan",  aA:90,aB:77,tm:"Fri Mar 27"},
+  "M14":{r:"midwest",rd:2,tA:"IowaState", tB:"Tennessee",  w:"Tennessee", aA:62,aB:76,tm:"Fri Mar 27"},
+  // Elite 8 — Sun Mar 29 (Final)
+  "M15":{r:"midwest",rd:3,tA:"Michigan",  tB:"Tennessee",  w:"Michigan",  aA:95,aB:62,tm:"Mar 29"},
 
   // ══ SOUTH (Tampa / Oklahoma City) ════════════════════════════════════
   // R1 — Thu Mar 19 & Fri Mar 20 (all final)
@@ -772,14 +791,15 @@ const G={
   "S10":{r:"south",rd:1,tA:"Nebraska",  tB:"Vanderbilt",w:"Nebraska",  aA:74,aB:72,tm:"Mar 21",apiH:"NEB", apiA:"VAN"},
   "S11":{r:"south",rd:1,tA:"Illinois",  tB:"VCU2",      w:"Illinois",  aA:76,aB:55,tm:"Mar 21",apiH:"ILL", apiA:"VCU"},
   "S12":{r:"south",rd:1,tA:"TexasAM",   tB:"Houston",   w:"Houston",   aA:57,aB:88,tm:"Mar 21",apiH:"HOU", apiA:"TXAM"},
-  // Sweet 16 — Thu Mar 26 (Pending)
-  "S14":{r:"south",rd:2,tA:"Iowa",      tB:"Nebraska",  w:null,tm:"Thu Mar 26"},
-  "S15":{r:"south",rd:2,tA:"Houston",   tB:"Illinois",  w:null,tm:"Thu Mar 26"},
-  "S16":{r:"south",rd:3,tA:null,        tB:null,        w:null,tm:"Mar 28"},
+  // Sweet 16 — Thu Mar 26 (Final)
+  "S14":{r:"south",rd:2,tA:"Iowa",      tB:"Nebraska",  w:"Iowa",      aA:77,aB:71,tm:"Thu Mar 26"},
+  "S15":{r:"south",rd:2,tA:"Houston",   tB:"Illinois",  w:"Illinois",  aA:55,aB:71,tm:"Thu Mar 26"},
+  // Elite 8 — Sat Mar 28 (Final)
+  "S16":{r:"south",rd:3,tA:"Iowa",      tB:"Illinois",  w:"Illinois",  aA:59,aB:71,tm:"Mar 28"},
 
   // ══ FINAL FOUR / CHAMPIONSHIP ═════════════════════════════════════════
-  "FF1":{r:"final4",      rd:4,tA:null,tB:null,w:null,tm:"Sat Apr 4"},
-  "FF2":{r:"final4",      rd:4,tA:null,tB:null,w:null,tm:"Sat Apr 4"},
+  "FF1":{r:"final4",      rd:4,tA:"UConn",    tB:"Arizona",  w:null,tm:"Sat Apr 4"},
+  "FF2":{r:"final4",      rd:4,tA:"Michigan", tB:"Illinois", w:null,tm:"Sat Apr 4"},
   "CHM":{r:"championship",rd:5,tA:null,tB:null,w:null,tm:"Mon Apr 6"},
 };
 
@@ -1147,8 +1167,8 @@ async function fetchAndRender(){
     processSnapshot(snapshot);
     const now=new Date(),ts=now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
     document.getElementById("lu-txt").textContent=
-      `Data current as of Mar 22 2026 · Sweet 16 starts Thu Mar 26 · Updated: ${ts}`;
-    setAPIStatus("ok","All R64 & R32 Final");
+      `Data current as of Mar 29 2026 · Elite 8 Complete · Final Four Sat Apr 4 · Updated: ${ts}`;
+    setAPIStatus("ok","All R64/R32/S16/E8 Final");
     document.getElementById("loading-overlay").classList.add("gone");
     renderAll();
   }catch(e){
