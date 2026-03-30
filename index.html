@@ -970,7 +970,7 @@ function renderBracket(){
         const pW2=ps?(ps.w===tA?ps.wS:ps.lS):0,pL2=ps?(ps.w===tA?ps.lS:ps.wS):0;
         const err=ps?Math.abs(pW2-aW)+Math.abs(pL2-aL):null;
         const ec=err===null?"em":err<=6?"eg":err<=14?"em":"eb";
-        html+=`<td><span class="as as-w">${dn(g.w)} ${aW}</span><span style="color:var(--ink2);margin:0 3px">–</span><span class="as as-l">${aL} ${dn(g.w===tA?tB:tA)}</span>${err!=null?`<span class="${ec}" style="margin-left:4px">±${err}pts</span>`:""}</td>`;
+        html+=`<td><span class="as as-w">${dn(g.w)} ${aW}</span><span style="color:var(--ink2);margin:0 3px">–</span><span class="as as-l">${aL} ${dn(g.w===tA?tB:tA)}</span>${(err!=null&&has)?`<span class="${ec}" style="margin-left:4px">±${err}pts</span>`:""}</td>`;
       } else if(isDone){
         html+=`<td><span class="chip c-fin">Final: ${dn(g.w)}</span></td>`;
       } else {
@@ -981,7 +981,10 @@ function renderBracket(){
           :`<td><span class="chip c-tbd" style="font-size:12px">Pending</span></td>`;
       }
       // Result column
-      if(!has)html+=`<td><span class="chip c-tbd">Pending</span></td>`;
+      if(isDone&&!has){
+        // Game is final but one/both teams not in model DB (e.g. R1 low seeds) — just show Final
+        html+=`<td><span class="chip c-fin">Final</span></td>`;
+      } else if(!has)html+=`<td><span class="chip c-tbd">Pending</span></td>`;
       else if(isLv)html+=`<td><span class="chip c-live"><span class="cdot"></span>Live</span></td>`;
       else if(isDone){
         const ok=(sc(tA)>=sc(tB)?tA:tB)===g.w;
