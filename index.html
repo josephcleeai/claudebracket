@@ -315,15 +315,15 @@ tr.done{background:var(--s1)}tr.live-row{animation:rowpulse 3s ease-in-out infin
     <div>
       <h1 class="site-title">Bracket <span class="yr">2026</span> Analyzed<span class="beta">BETA</span></h1>
       <p class="hdr-meta">3-Year Model (2023–25) · P=1/(1+e^−0.038·ΔS) · margin=4.2·ΔS^0.72</p>
-      <a class="src-link" href="https://www.ncaa.com/scoreboard/basketball-men/d1/2026/03/22/all-conf" target="_blank" rel="noopener">
-        <span class="src-dot"></span>Live scores · NCAA.com · auto-refresh every 10s
+      <a class="src-link" href="https://www.ncaa.com/news/basketball-men/mml-official-bracket/2026-04-04/2026-ncaa-tournament-bracket-schedule-scores-march-madness" target="_blank" rel="noopener">
+        <span class="src-dot"></span>Official Bracket · NCAA.com
       </a>
     </div>
     <div class="hdr-right">
       <div class="badge-row">
-        <span class="bdg bdg-fin"  id="bdg-fin">0 Final</span>
+        <span class="bdg bdg-gld">🏆 Michigan Champions</span>
+        <span class="bdg bdg-fin"  id="bdg-fin">67 Final</span>
         <span class="bdg bdg-blu">2025–26</span>
-        <span class="bdg bdg-gld">78.3% 3-yr</span>
       </div>
       <div class="api-row">
         <div class="api-dot ld" id="api-dot"></div>
@@ -333,11 +333,11 @@ tr.done{background:var(--s1)}tr.live-row{animation:rowpulse 3s ease-in-out infin
         <div class="ring-wrap">
           <svg class="ring-svg" viewBox="0 0 30 30">
             <circle class="ring-track" cx="15" cy="15" r="12"/>
-            <circle class="ring-arc" id="ring-arc" cx="15" cy="15" r="12" stroke-dasharray="75.40" stroke-dashoffset="0"/>
+            <circle class="ring-arc" id="ring-arc" cx="15" cy="15" r="12" stroke-dasharray="75.40" stroke-dashoffset="0" style="stroke:var(--gld)"/>
           </svg>
-          <div class="ring-num" id="ring-num">10</div>
+          <div class="ring-num" id="ring-num" style="color:var(--gld);font-size:10px">✓</div>
         </div>
-        <span class="ring-label">Refresh in <strong id="ring-sec">10</strong>s<br><span class="ring-sub">via ncaa.com</span></span>
+        <span class="ring-label">🏆 <strong>Michigan</strong><br><span class="ring-sub">2026 Champions</span></span>
       </div>
     </div>
   </div>
@@ -350,7 +350,7 @@ tr.done{background:var(--s1)}tr.live-row{animation:rowpulse 3s ease-in-out infin
 
 <div class="lu-bar">
   <div class="lu-dot"></div>
-  <span id="lu-txt">All R1 &amp; R2 results verified · Sweet 16 in progress</span>
+  <span id="lu-txt">🏆 Tournament Complete · Michigan wins 2026 National Championship · Michigan 69, UConn 63</span>
   <span style="margin-left:auto;color:var(--cyn)">Accuracy: <strong id="hdr-acc">—</strong></span>
 </div>
 
@@ -485,6 +485,11 @@ const INITIAL_SNAPSHOT = [
   {id:"617132",status:"closed",home:"SJU", away:"KU",  hScore:67,aScore:65},
   {id:"1fb1be",status:"closed",home:"CONN",away:"UCLA",hScore:73,aScore:57},
   {id:"ffcc99",status:"closed",home:"IOWA",away:"FLA", hScore:73,aScore:72},
+  // ══ FINAL FOUR — Saturday Apr 4 ══════════════════════════════════════
+  {id:"ff1_2026",status:"closed",home:"CONN",away:"ILL", hScore:71,aScore:62},
+  {id:"ff2_2026",status:"closed",home:"MICH",away:"ARIZ",hScore:91,aScore:73},
+  // ══ CHAMPIONSHIP — Monday Apr 6 ══════════════════════════════════════
+  {id:"chm_2026",status:"closed",home:"MICH",away:"CONN",hScore:69,aScore:63},
 ];
 
 // Friendly display names per abbreviation
@@ -834,9 +839,9 @@ const G={
   "S16":{r:"south",rd:3,tA:"Iowa",      tB:"Illinois",  w:"Illinois",  aA:59,aB:71,tm:"Mar 28"},
 
   // ══ FINAL FOUR / CHAMPIONSHIP ═════════════════════════════════════════
-  "FF1":{r:"final4",      rd:4,tA:"UConn",    tB:"Arizona",  w:null,tm:"Sat Apr 4"},
-  "FF2":{r:"final4",      rd:4,tA:"Michigan", tB:"Illinois", w:null,tm:"Sat Apr 4"},
-  "CHM":{r:"championship",rd:5,tA:null,tB:null,w:null,tm:"Mon Apr 6"},
+  "FF1":{r:"final4",      rd:4,tA:"UConn",    tB:"Illinois", w:"UConn",    aA:71,aB:62,tm:"Sat Apr 4"},
+  "FF2":{r:"final4",      rd:4,tA:"Michigan", tB:"Arizona",  w:"Michigan", aA:91,aB:73,tm:"Sat Apr 4"},
+  "CHM":{r:"championship",rd:5,tA:"Michigan", tB:"UConn",    w:"Michigan", aA:69,aB:63,tm:"Mon Apr 6"},
 };
 
 const PROG={
@@ -855,7 +860,7 @@ const PROG={
   "W7":["W12","A"],"W8":["W12","B"],
   "W9":["W13","A"],"W10":["W13","B"],
   "W11":["W14","A"],"W12":["W14","B"],
-  "W13":["W15","A"],"W14":["W15","B"],"W15":["FF1","B"],
+  "W13":["W15","A"],"W14":["W15","B"],"W15":["FF2","B"],
   // Midwest: M1/M2→M9, M3/M4→M10, M5/M6→M11, M7/M8→M12
   "M1":["M9","A"],"M2":["M9","B"],
   "M3":["M10","A"],"M4":["M10","B"],
@@ -871,7 +876,7 @@ const PROG={
   "S7":["S12","A"],"S8":["S12","B"],
   "S9":["S14","A"],"S10":["S14","B"],
   "S11":["S15","A"],"S12":["S15","B"],
-  "S14":["S16","A"],"S15":["S16","B"],"S16":["FF2","B"],
+  "S14":["S16","A"],"S15":["S16","B"],"S16":["FF1","B"],
   "FF1":["CHM","A"],"FF2":["CHM","B"],
 };
 
@@ -1095,9 +1100,10 @@ function renderPath(){
   html+=`</div>`;
   const cw=pw("CHM"),ff1w=pw("FF1"),ff2w=pw("FF2");
   html+=`<div class="champ-box">
-    <div class="champ-lbl">🏆 Predicted 2026 National Champion · Apr 6 · Indianapolis</div>
+    <div class="champ-lbl">🏆 2026 National Champion · Apr 6 · Indianapolis · FINAL</div>
     <div class="champ-name">${cw?dn(cw):"Bracket Unresolved"}</div>
-    <div class="champ-detail">${cw?`Seed ${sd(cw)} · Score ${sc(cw).toFixed(1)} · Final Four: ${ff1w?dn(ff1w):"TBD"} vs ${ff2w?dn(ff2w):"TBD"}`:""}</div>
+    <div class="champ-detail">${cw?`Seed ${sd(cw)} · Michigan 69, UConn 63 · Final Four: ${ff1w?dn(ff1w):"TBD"} vs ${ff2w?dn(ff2w):"TBD"}`:""}
+    </div>
   </div>`;
   el.innerHTML=html;
 }
@@ -1108,6 +1114,7 @@ function renderHist(){
     {yr:2023,ch:"UConn (4-seed)",fin:"UConn 76 – San Diego State 59",acc:79.4,mae:5.1,r1:"48/64",r2:"12/16",s16:"10/16",e8:"6/8",ff:"3/4",note:"FDU (16-seed) upset Purdue · FAU to Final Four"},
     {yr:2024,ch:"UConn (1-seed)",fin:"UConn 75 – Purdue 60",acc:77.8,mae:4.9,r1:"47/64",r2:"12/16",s16:"9/16",e8:"5/8",ff:"3/4",note:"Back-to-back champions · NC State (11) Final Four"},
     {yr:2025,ch:"Florida (1-seed)",fin:"Florida 80 – Houston 71",acc:77.8,mae:4.6,r1:"48/64",r2:"12/16",s16:"10/16",e8:"6/8",ff:"2/4",note:"First Florida title since 2007 · Ole Miss upset Iowa State"},
+    {yr:2026,ch:"Michigan (1-seed)",fin:"Michigan 69 – UConn 63",acc:"—",mae:"—",r1:"—",r2:"—",s16:"—",e8:"—",ff:"2/2",note:"Michigan's first title since 1989 · UConn's 3rd title game in 4 years"},
   ];
   document.getElementById("hist-cards").innerHTML=yrs.map(y=>`
     <div class="hist-card">
@@ -1206,8 +1213,8 @@ async function fetchAndRender(){
     processSnapshot(snapshot);
     const now=new Date(),ts=now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
     document.getElementById("lu-txt").textContent=
-      `Data current as of Mar 29 2026 · Elite 8 Complete · Final Four Sat Apr 4 · Updated: ${ts}`;
-    setAPIStatus("ok","All R64/R32/S16/E8 Final");
+      `Data current as of Apr 6 2026 · 🏆 Michigan wins 2026 National Championship · Michigan 69, UConn 63 · Updated: ${ts}`;
+    setAPIStatus("ok","Tournament Complete · Michigan Champions");
     document.getElementById("loading-overlay").classList.add("gone");
     renderAll();
   }catch(e){
